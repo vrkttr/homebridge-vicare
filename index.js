@@ -14,7 +14,7 @@ class ViCareThermostat {
     this.name = config.name;
     this.apiEndpoint = config.apiEndpoint || 'https://api.viessmann.com/iot/v2';
     this.accessToken = config.accessToken;
-    this.debug = config.debug || false; // Debugging aktivieren oder deaktivieren
+    this.debug = config.debug || false;
 
     this.services = [];
 
@@ -50,7 +50,7 @@ class ViCareThermostat {
       this.gatewaySerial = await this.getGatewaySerial();
       this.deviceId = await this.getDeviceId();
     } catch (error) {
-      throw new Error('Failed to retrieve IDs: ' + error.message);
+      this.log('Failed to retrieve IDs: ', error.message);
     }
   }
 
@@ -191,7 +191,6 @@ class ViCareThermostat {
         this.services.push(sensorService);
       }
 
-      // Example for Burner active state as switch
       if (featureName === "heating.burners.0" && properties.active) {
         const switchService = new Service.Switch(featureName);
 
@@ -202,6 +201,45 @@ class ViCareThermostat {
           });
 
         this.services.push(switchService);
+      }
+
+      // Raumtemperatursensor
+      if (featureName === 'heating.circuits.0.sensors.temperature.room' && properties.value) {
+        const roomTemperatureSensor = new Service.TemperatureSensor('Room Temperature Sensor');
+
+        roomTemperatureSensor
+          .getCharacteristic(Characteristic.CurrentTemperature)
+          .on('get', (callback) => {
+            callback(null, properties.value.value);
+          });
+
+        this.services.push(roomTemperatureSensor);
+      }
+
+      // Versorgungstemperatursensor
+      if (featureName === 'heating.circuits.0.sensors.temperature.supply' && properties.value) {
+        const supplyTemperatureSensor = new Service.TemperatureSensor('Supply Temperature Sensor');
+
+        supplyTemperatureSensor
+          .getCharacteristic(Characteristic.CurrentTemperature)
+          .on('get', (callback) => {
+            callback(null, properties.value.value);
+          });
+
+        this.services.push(supplyTemperatureSensor);
+      }
+
+      // Warmwasserspeichertemperatursensor
+      if (featureName === 'heating.dhw.sensors.temperature.dhwCylinder' && properties.value) {
+        const hotWaterTemperatureSensor = new Service.TemperatureSensor('Hot Water Storage Temperature Sensor');
+
+        hotWaterTemperatureSensor
+          .getCharacteristic(Characteristic.CurrentTemperature)
+          .on('get', (callback) => {
+            callback(null, properties.value.value);
+          });
+
+        this.services.push(hotWaterTemperatureSensor);
       }
     });
   }
