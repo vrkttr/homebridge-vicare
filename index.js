@@ -9,8 +9,11 @@ module.exports = (homebridge) => {
 };
 
 class ViCareThermostat {
-  constructor(log, config) {
+  constructor(log, config, api) {
     this.log = log;
+    this.config = config;
+    this.api = api;
+
     this.name = config.name;
     this.apiEndpoint = config.apiEndpoint || 'https://api.viessmann.com/iot/v2';
     this.accessToken = config.accessToken;
@@ -18,6 +21,28 @@ class ViCareThermostat {
 
     this.services = [];
 
+    this.setupInformationService();
+    this.setupThermostatService();
+
+    this.retrieveIds().then(() => {
+      this.log('Alle notwendigen IDs abgerufen.');
+      this.listAvailableFeatures();
+    }).catch(err => {
+      this.log('Fehler beim Abrufen der IDs:', err);
+    });
+  }
+
+  setupInformationService() {
+    this.informationService = new Service.AccessoryInformation();
+    this.informationService
+      .setCharacteristic(Characteristic.Manufacturer, 'Viessmann')
+      .setCharacteristic(Characteristic.Model, 'ViCare')
+      .setCharacteristic(Characteristic.SerialNumber, '123-456-789');
+
+    this.services.push(this.informationService);
+  }
+
+  setupThermostatService() {
     this.thermostatService = new Service.Thermostat(this.name);
 
     this.thermostatService
@@ -35,52 +60,27 @@ class ViCareThermostat {
       });
 
     this.services.push(this.thermostatService);
-
-    this.retrieveIds().then(() => {
-      this.log('Retrieved all necessary IDs.');
-      this.listAvailableFeatures();
-    }).catch(err => {
-      this.log('Error retrieving IDs:', err);
-    });
   }
 
   async retrieveIds() {
-    try {
-      this.installationId = await this.getInstallationId();
-      this.gatewaySerial = await this.getGatewaySerial();
-      this.deviceId = await this.getDeviceId();
-    } catch (error) {
-      this.log('Failed to retrieve IDs: ', error.message);
-    }
+    this.installationId = await this.getInstallationId();
+    this.gatewaySerial = await this.getGatewaySerial();
+    this.deviceId = await this.getDeviceId();
   }
 
   getInstallationId() {
     return new Promise((resolve, reject) => {
       request.get({
-        url: 'https://api.viessmann.com/iot/v1/equipment/installations',
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`
-        }
+        url: `${this.apiEndpoint}/equipment/installations`,
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
       }, (error, response, body) => {
-        if (error) {
-          return reject(error);
-        }
-        try {
-          const data = JSON.parse(body);
-          if (this.debug) {
-            this.log('Installation data:', data);
-          }
-          if (data.statusCode === 401) {
-            return reject(new Error('Unauthorized: ' + data.message));
-          }
-          if (data.data && data.data.length > 0) {
-            const installationId = data.data[0].id;
-            resolve(installationId);
-          } else {
-            reject(new Error('No installations found'));
-          }
-        } catch (parseError) {
-          reject(parseError);
+        if (error) return reject(error);
+        const data = JSON.parse(body);
+        if (this.debug) this.log('Installationsdaten:', data);
+        if (data.data && data.data.length > 0) {
+          resolve(data.data[0].id);
+        } else {
+          reject(new Error('Keine Installationen gefunden'));
         }
       });
     });
@@ -89,30 +89,16 @@ class ViCareThermostat {
   getGatewaySerial() {
     return new Promise((resolve, reject) => {
       request.get({
-        url: 'https://api.viessmann.com/iot/v1/equipment/gateways',
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`
-        }
+        url: `${this.apiEndpoint}/equipment/gateways`,
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
       }, (error, response, body) => {
-        if (error) {
-          return reject(error);
-        }
-        try {
-          const data = JSON.parse(body);
-          if (this.debug) {
-            this.log('Gateway data:', data);
-          }
-          if (data.statusCode === 401) {
-            return reject(new Error('Unauthorized: ' + data.message));
-          }
-          if (data.data && data.data.length > 0) {
-            const gatewaySerial = data.data[0].serial;
-            resolve(gatewaySerial);
-          } else {
-            reject(new Error('No gateways found'));
-          }
-        } catch (parseError) {
-          reject(parseError);
+        if (error) return reject(error);
+        const data = JSON.parse(body);
+        if (this.debug) this.log('Gateway-Daten:', data);
+        if (data.data && data.data.length > 0) {
+          resolve(data.data[0].serial);
+        } else {
+          reject(new Error('Keine Gateways gefunden'));
         }
       });
     });
@@ -120,32 +106,18 @@ class ViCareThermostat {
 
   getDeviceId() {
     return new Promise((resolve, reject) => {
-      const url = `https://api.viessmann.com/iot/v1/equipment/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices`;
+      const url = `${this.apiEndpoint}/equipment/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices`;
       request.get({
         url: url,
-        headers: {
-          'Authorization': `Bearer ${this.accessToken}`
-        }
+        headers: { 'Authorization': `Bearer ${this.accessToken}` }
       }, (error, response, body) => {
-        if (error) {
-          return reject(error);
-        }
-        try {
-          const data = JSON.parse(body);
-          if (this.debug) {
-            this.log('Device data:', data);
-          }
-          if (data.statusCode === 401) {
-            return reject(new Error('Unauthorized: ' + data.message));
-          }
-          if (data.data && data.data.length > 0) {
-            const deviceId = data.data[0].id;
-            resolve(deviceId);
-          } else {
-            reject(new Error('No devices found'));
-          }
-        } catch (parseError) {
-          reject(parseError);
+        if (error) return reject(error);
+        const data = JSON.parse(body);
+        if (this.debug) this.log('Gerätedaten:', data);
+        if (data.data && data.data.length > 0) {
+          resolve(data.data[0].id);
+        } else {
+          reject(new Error('Keine Geräte gefunden'));
         }
       });
     });
@@ -155,31 +127,23 @@ class ViCareThermostat {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features`;
     request.get({
       url: url,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`
-      }
+      headers: { 'Authorization': `Bearer ${this.accessToken}` }
     }, (error, response, body) => {
       if (error) {
-        this.log('Error listing available features:', error);
+        this.log('Fehler beim Auflisten der verfügbaren Funktionen:', error);
       } else {
-        try {
-          const data = JSON.parse(body).data;
-          if (this.debug) {
-            this.log('Available features:', data);
-          }
-          if (Array.isArray(data)) {
-            this.createSensors(data);
-          } else {
-            this.log('Unexpected data format for features:', data);
-          }
-        } catch (parseError) {
-          this.log('Error parsing available features:', parseError);
+        const data = JSON.parse(body).data;
+        if (this.debug) this.log('Verfügbare Funktionen:', data);
+        if (Array.isArray(data)) {
+          this.createSensorsAndSwitches(data);
+        } else {
+          this.log('Unerwartetes Datenformat für Funktionen:', data);
         }
       }
     });
   }
 
-  createSensors(features) {
+  createSensorsAndSwitches(features) {
     features.forEach(feature => {
       const { feature: featureName, properties } = feature;
 
@@ -193,6 +157,7 @@ class ViCareThermostat {
           });
 
         this.services.push(sensorService);
+        this.log(`Sensor hinzugefügt: ${featureName}`);
       }
 
       if (featureName === "heating.burners.0" && properties.active) {
@@ -205,11 +170,12 @@ class ViCareThermostat {
           });
 
         this.services.push(switchService);
+        this.log(`Schalter hinzugefügt: ${featureName}`);
       }
 
-      // Raumtemperatursensor
+      // Raumtemperatursensor (Heizkreis 1)
       if (featureName === 'heating.circuits.0.sensors.temperature.room' && properties.value) {
-        const roomTemperatureSensor = new Service.TemperatureSensor('Room Temperature Sensor');
+        const roomTemperatureSensor = new Service.TemperatureSensor('Raumtemperatursensor');
 
         roomTemperatureSensor
           .getCharacteristic(Characteristic.CurrentTemperature)
@@ -218,11 +184,12 @@ class ViCareThermostat {
           });
 
         this.services.push(roomTemperatureSensor);
+        this.log('Sensor hinzugefügt: Raumtemperatursensor');
       }
 
       // Versorgungstemperatursensor
       if (featureName === 'heating.circuits.0.sensors.temperature.supply' && properties.value) {
-        const supplyTemperatureSensor = new Service.TemperatureSensor('Supply Temperature Sensor');
+        const supplyTemperatureSensor = new Service.TemperatureSensor('Versorgungstemperatursensor');
 
         supplyTemperatureSensor
           .getCharacteristic(Characteristic.CurrentTemperature)
@@ -231,11 +198,12 @@ class ViCareThermostat {
           });
 
         this.services.push(supplyTemperatureSensor);
+        this.log('Sensor hinzugefügt: Versorgungstemperatursensor');
       }
 
       // Warmwasserspeichertemperatursensor
       if (featureName === 'heating.dhw.sensors.temperature.dhwCylinder' && properties.value) {
-        const hotWaterTemperatureSensor = new Service.TemperatureSensor('Hot Water Storage Temperature Sensor');
+        const hotWaterTemperatureSensor = new Service.TemperatureSensor('Warmwasserspeichertemperatursensor');
 
         hotWaterTemperatureSensor
           .getCharacteristic(Characteristic.CurrentTemperature)
@@ -244,34 +212,31 @@ class ViCareThermostat {
           });
 
         this.services.push(hotWaterTemperatureSensor);
+        this.log('Sensor hinzugefügt: Warmwasserspeichertemperatursensor');
       }
     });
+
+    this.log(`Hinzugefügte Sensoren und Schalter: ${this.services.length - 1}`);
   }
 
   getCurrentTemperature(callback) {
     if (!this.deviceId) {
-      return callback(new Error('Device ID not yet available'));
+      return callback(new Error('Geräte-ID noch nicht verfügbar'));
     }
-    const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/heating.circuits.0.operating.programs.reduced`;
+    const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/heating.circuits.0.operating.programs.normal`;
     request.get({
       url: url,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`
-      }
+      headers: { 'Authorization': `Bearer ${this.accessToken}` }
     }, (error, response, body) => {
       if (error) {
         callback(error);
       } else {
-        try {
-          const data = JSON.parse(body).data;
-          const currentTemperature = parseFloat(data.properties.temperature.value);
-          if (!isNaN(currentTemperature) && isFinite(currentTemperature)) {
-            callback(null, currentTemperature);
-          } else {
-            callback(new Error('Invalid current temperature value'));
-          }
-        } catch (parseError) {
-          callback(parseError);
+        const data = JSON.parse(body).data;
+        const currentTemperature = parseFloat(data.properties.temperature.value);
+        if (!isNaN(currentTemperature) && isFinite(currentTemperature)) {
+          callback(null, currentTemperature);
+        } else {
+          callback(new Error('Ungültiger Wert für die aktuelle Temperatur'));
         }
       }
     });
@@ -279,28 +244,22 @@ class ViCareThermostat {
 
   getTargetTemperature(callback) {
     if (!this.deviceId) {
-      return callback(new Error('Device ID not yet available'));
+      return callback(new Error('Geräte-ID noch nicht verfügbar'));
     }
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/heating.circuits.0.operating.programs.normal`;
     request.get({
       url: url,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`
-      }
+      headers: { 'Authorization': `Bearer ${this.accessToken}` }
     }, (error, response, body) => {
       if (error) {
         callback(error);
       } else {
-        try {
-          const data = JSON.parse(body).data;
-          const targetTemperature = parseFloat(data.properties.temperature.value);
-          if (!isNaN(targetTemperature) && isFinite(targetTemperature)) {
-            callback(null, targetTemperature);
-          } else {
-            callback(new Error('Invalid target temperature value'));
-          }
-        } catch (parseError) {
-          callback(parseError);
+        const data = JSON.parse(body).data;
+        const targetTemperature = parseFloat(data.properties.temperature.value);
+        if (!isNaN(targetTemperature) && isFinite(targetTemperature)) {
+          callback(null, targetTemperature);
+        } else {
+          callback(new Error('Ungültiger Wert für die Zieltemperatur'));
         }
       }
     });
@@ -308,14 +267,12 @@ class ViCareThermostat {
 
   setTargetTemperature(value, callback) {
     if (!this.deviceId) {
-      return callback(new Error('Device ID not yet available'));
+      return callback(new Error('Geräte-ID noch nicht verfügbar'));
     }
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/heating.circuits.0.operating.programs.normal/commands/setTemperature`;
     request.post({
       url: url,
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`
-      },
+      headers: { 'Authorization': `Bearer ${this.accessToken}` },
       json: {
         targetTemperature: value
       }
