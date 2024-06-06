@@ -32,13 +32,64 @@ To use this plugin, you will need to create an API key by following these steps:
 ## Config
 
 ```python
+{
+    "platforms": [
         {
-            "accessory": "ViCareThermostat",
-            "name": "Viessmann",
-            "debug": false,
-            "accessToken": "YOUR ACCESS TOKEN"
+            "platform": "ViCareThermostatPlatform",
+            "name": "ViCareThermostat",
+            "accessToken": "YOUR ACCESS TOKEN",
+            "apiEndpoint": "https://api.viessmann.com/iot/v1",
+            "devices": [
+                {
+                    "name": "Supply temperature",
+                    "feature": "heating.circuits.0.sensors.temperature.supply",
+                    "deviceId": "0"
+                },
+                {
+                    "name": "Main DHW temperature",
+                    "feature": "heating.dhw.temperature.main",
+                    "deviceId": "0"
+                }
+            ]
         }
+    ]
+  }
 ```
+
+## Available Features
+
+**Heating Circuits**
+
+- heating.circuits.0.sensors.temperature.supply: Supply temperature
+- heating.circuits.0.operating.modes.active: Active operating mode
+- heating.circuits.0.operating.programs.active: Active program
+- heating.circuits.0.operating.programs.normal: Normal program
+- heating.circuits.0.operating.programs.reduced: Reduced program
+
+**Domestic Hot Water (DHW)**
+
+- heating.dhw.temperature.main: Main DHW temperature
+- heating.dhw.sensors.temperature.dhwCylinder: DHW cylinder temperature
+- heating.dhw.oneTimeCharge: One-time DHW charge
+
+**Burners**
+
+- heating.burners.0: Burner status
+- heating.burners.0.modulation: Burner modulation
+
+**General Boiler Data**
+
+- heating.boiler.sensors.temperature.commonSupply: Common supply temperature
+- heating.boiler.temperature: Boiler temperature
+
+**Room Temperature**
+
+- heating.circuits.0.sensors.temperature.room: Room temperature
+
+**Gas Consumption**
+
+- heating.gas.consumption.heating: Heating gas consumption
+- heating.gas.consumption.dhw: DHW gas consumption
 
 ## Contributing
 
