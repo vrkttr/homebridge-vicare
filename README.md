@@ -73,31 +73,69 @@ The plugin will handle the OAuth2 authentication process automatically. Follow t
 - heating.circuits.0.operating.programs.active: Active program
 - heating.circuits.0.operating.programs.normal: Normal program
 - heating.circuits.0.operating.programs.reduced: Reduced program
+- heating.circuits.0.sensors.temperature.room: Room temperature
+- heating.circuits.0.heating.curve: Heating curve
 
 **Domestic Hot Water (DHW)**
 
 - heating.dhw.temperature.main: Main DHW temperature
 - heating.dhw.sensors.temperature.dhwCylinder: DHW cylinder temperature
 - heating.dhw.oneTimeCharge: One-time DHW charge
+- heating.dhw.charging: DHW charging
+- heating.dhw.temperature.hysteresis: DHW temperature hysteresis
 
 **Burners**
 
 - heating.burners.0: Burner status
 - heating.burners.0.modulation: Burner modulation
+- heating.burners.0.statistics: Burner statistics (start count, operating hours)
 
 **General Boiler Data**
 
 - heating.boiler.sensors.temperature.commonSupply: Common supply temperature
 - heating.boiler.temperature: Boiler temperature
-
-**Room Temperature**
-
-- heating.circuits.0.sensors.temperature.room: Room temperature
+- heating.boiler.sensors.temperature.return: Return temperature
+- heating.boiler.serial: Boiler serial number
+- heating.boiler.pressure: Boiler pressure
 
 **Gas Consumption**
 
 - heating.gas.consumption.heating: Heating gas consumption
 - heating.gas.consumption.dhw: DHW gas consumption
+- heating.gas.consumption.total: Total gas consumption
+
+**Smart Components**
+
+- List of all smart components available in the installation
+- Selecting specific smart components for use
+
+**Solar**
+
+- solar.power.production.current: Current solar power production
+- solar.power.production.daily: Daily solar power production
+- solar.power.production.monthly: Monthly solar power production
+- solar.sensors.temperature.collector: Solar collector temperature
+- solar.sensors.temperature.dhw: Solar DHW temperature
+
+**Heat Pump**
+
+- heatpump.power.consumption.current: Current heat pump power consumption
+- heatpump.power.consumption.daily: Daily heat pump power consumption
+- heatpump.power.consumption.monthly: Monthly heat pump power consumption
+- heatpump.sensors.temperature.evaporator: Evaporator temperature
+- heatpump.sensors.temperature.condensor: Condensor temperature
+- heatpump.sensors.temperature.outside: Outside temperature
+- heatpump.compressor.starts: Compressor start count
+- heatpump.compressor.hours: Compressor operating hours
+
+**Ventilation**
+
+- ventilation.operating.modes.active: Active ventilation mode
+- ventilation.operating.modes.normal: Normal ventilation mode
+- ventilation.operating.modes.reduced: Reduced ventilation mode
+- ventilation.sensors.humidity: Humidity sensor data
+- ventilation.sensors.co2: CO2 sensor data
+- ventilation.fan.speed: Ventilation fan speed
 
 ## Contributing
 
