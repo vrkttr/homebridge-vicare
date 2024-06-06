@@ -167,7 +167,11 @@ class ViCareThermostat {
           if (this.debug) {
             this.log('Available features:', data);
           }
-          this.createSensors(data);
+          if (Array.isArray(data)) {
+            this.createSensors(data);
+          } else {
+            this.log('Unexpected data format for features:', data);
+          }
         } catch (parseError) {
           this.log('Error parsing available features:', parseError);
         }
