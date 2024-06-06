@@ -17,27 +17,27 @@ To use this plugin, you will need to create an API key by following these steps:
 
 1. **Create an Account**: Sign up for an account on the [Viessmann Developer Portal](https://app.developer.viessmann.com/).
 
-2. **Generate an Access Token**:
-    - Visit [Viessmann Developer Portal](https://app.developer.viessmann.com/).
-    - Create a new account or log in if you already have one.
+2. **Create a new client:**
+    - Log in to the Viessmann Developer Portal.
     - Navigate to "Clients" and create a new client.
     - Wait a few minutes for the client to be registered.
-    - Go to the "API Keys" section and generate a new Access Token.
-    - In the "Select" menu, choose "First Option" and ensure the "IoT" scope is selected.
-    - Copy the Access Token and use it in your Homebridge configuration.
 
-3. **Save Your Access Token**: Copy the generated access token and keep it in a safe place. You will need this token to configure the plugin.
+3. **Redirect URI Configuration:**
+    - Set the Redirect URI in the Developer Portal to `http://YOUR_LOCAL_IP:4200`. Replace `YOUR_LOCAL_IP` with the local IP address of the machine running Homebridge.
 
+4. **Update your Homebridge config.json:**
+    - Copy the `client_id` from your registered client in the Developer Portal.
+    - Update your `config.json` with the `client_id`:
 
 ## Config
 
-```python
+```json
 {
     "platforms": [
         {
             "platform": "ViCareThermostatPlatform",
             "name": "ViCareThermostat",
-            "accessToken": "YOUR ACCESS TOKEN",
+            "clientId": "YOUR CLIENT ID",
             "apiEndpoint": "https://api.viessmann.com/iot/v1",
             "devices": [
                 {
@@ -53,8 +53,16 @@ To use this plugin, you will need to create an API key by following these steps:
             ]
         }
     ]
-  }
+}
 ```
+
+## Authentication Process
+
+The plugin will handle the OAuth2 authentication process automatically. Follow these steps:
+
+1. Start Homebridge. The plugin will log a URL for authentication.
+2. Open the URL in your browser. You will be prompted to log in to your Viessmann account and authorize the application.
+3. After successful login, you will be redirected to the Redirect URI you configured. The plugin will automatically capture the authorization code and exchange it for an access token.
 
 ## Available Features
 
@@ -93,8 +101,7 @@ To use this plugin, you will need to create an API key by following these steps:
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
