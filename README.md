@@ -18,10 +18,13 @@ To use this plugin, you will need to create an API key by following these steps:
 1. **Create an Account**: Sign up for an account on the [Viessmann Developer Portal](https://app.developer.viessmann.com/).
 
 2. **Generate an Access Token**:
-    - After logging in, navigate to the "API Keys" section.
-    - Click on "Generate New Key".
-    - For the first select option, choose "First Option".
-    - Under the scopes section, select "IoT".
+    - Visit [Viessmann Developer Portal](https://app.developer.viessmann.com/).
+    - Create a new account or log in if you already have one.
+    - Navigate to "Clients" and create a new client.
+    - Wait a few minutes for the client to be registered.
+    - Go to the "API Keys" section and generate a new Access Token.
+    - In the "Select" menu, choose "First Option" and ensure the "IoT" scope is selected.
+    - Copy the Access Token and use it in your Homebridge configuration.
 
 3. **Save Your Access Token**: Copy the generated access token and keep it in a safe place. You will need this token to configure the plugin.
 
