@@ -69,7 +69,7 @@ class ViCareThermostatPlatform {
   }
 
   authenticate(callback) {
-    const authUrl = `https://iam.viessmann.com/idp/v3/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&scope=IoT%20User&response_type=code&code_challenge_method=S256&code_challenge=${this.codeChallenge}`;
+    const authUrl = `https://iam.viessmann.com/idp/v3/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&scope=IoT%20User%20offline_access&response_type=code&code_challenge_method=S256&code_challenge=${this.codeChallenge}`;
 
     this.log(`Opening browser for authentication: ${authUrl}`);
     open(authUrl);
