@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.0...v2.2.1) (2024-12-20)
+
+
+### Bug Fixes
+
+* Re-add callback where it is needed ([bc1417a](https://github.com/ffflorian/homebridge-vicare-2/commit/bc1417a59fc0492d608f8a6ca78c497e3abb9c6f))
+
 # [2.2.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.1.35...v2.2.0) (2024-12-20)
 
 
