@@ -80,7 +80,7 @@ class ViCareThermostatPlatform {
       }
 
       if (this.accessToken) {
-        this.log.debug('Authentication successful, received access token.');
+        this.log('Authentication successful, received access token.');
       } else {
         this.log.error('Authentication did not succeed, received no access token.');
         return;
@@ -88,7 +88,7 @@ class ViCareThermostatPlatform {
 
       try {
         const {installationId, gatewaySerial} = await this.retrieveIds();
-        this.log.debug('Retrieved installation and gateway IDs.');
+        this.log('Retrieved installation and gateway IDs.');
         this.installationId = installationId;
         this.gatewaySerial = gatewaySerial;
         for (const deviceConfig of this.devices) {
@@ -171,7 +171,7 @@ class ViCareThermostatPlatform {
         (error, response, body: string) => {
           if (error || response.statusCode !== 200) {
             this.log.error('Error exchanging code for token:', error || body);
-            return reject(error || new Error(JSON.stringify(body)));
+            return reject(error || new Error(JSON.stringify(body, null, 2)));
           }
 
           this.log.debug('Successfully exchanged code for access token.');
@@ -197,10 +197,11 @@ class ViCareThermostatPlatform {
       request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannInstallation[]>) => {
         if (error || response.statusCode !== 200) {
           this.log.error('Error retrieving installations:', error || body);
-          return reject(error || new Error(JSON.stringify(body)));
+          return reject(error || new Error(JSON.stringify(body, null, 2)));
         }
 
-        this.log.debug('Successfully retrieved installations:', body);
+        this.log('Successfully retrieved installations.');
+        this.log.debug(JSON.stringify(body, null, 2));
         const installation = body.data[0];
         const installationId = installation.id;
 
@@ -217,10 +218,11 @@ class ViCareThermostatPlatform {
         request.get(gatewayOptions, (error, response, body: ViessmannAPIResponse<ViessmannGateway[]>) => {
           if (error || response.statusCode !== 200) {
             this.log.error('Error retrieving gateways:', error || body);
-            return reject(error || new Error(JSON.stringify(body)));
+            return reject(error || new Error(JSON.stringify(body, null, 2)));
           }
 
-          this.log.debug('Successfully retrieved gateways:', body);
+          this.log('Successfully retrieved gateways.');
+          this.log.debug(JSON.stringify(body, null, 2));
           if (!body.data || body.data.length === 0) {
             this.log.error('No gateway data available.');
             return reject(new Error('No gateway data available.'));
@@ -251,7 +253,8 @@ class ViCareThermostatPlatform {
         return;
       }
 
-      this.log.debug('Successfully retrieved smart components:', body);
+      this.log.debug('Successfully retrieved smart components.');
+      this.log.debug(JSON.stringify(body, null, 2));
       for (const component of body.data) {
         this.log.debug(
           `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
@@ -282,7 +285,7 @@ class ViCareThermostatPlatform {
         }
 
         const result: ViessmannAPIResponse<ViessmannSmartComponent[]> = JSON.parse(body);
-        this.log.debug('Successfully selected smart components:', result);
+        this.log('Successfully selected smart components:', result);
         resolve({result});
       })
     );
@@ -415,7 +418,7 @@ class ViCareThermostatAccessory {
           }
         } else {
           this.log.error('Error fetching temperature:', error || body);
-          callback(error || new Error(JSON.stringify(body)));
+          callback(error || new Error(JSON.stringify(body, null, 2)));
         }
       }
     );
