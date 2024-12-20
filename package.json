@@ -8,6 +8,14 @@
     "request": "^2.88.2"
   },
   "description": "Homebridge plugin for Viessmann ViCare",
+  "devDependencies": {
+    "@ffflorian/prettier-config": "0.3.3",
+    "@types/node": "~22",
+    "@types/request": "2.48.12",
+    "homebridge": "1.8.5",
+    "prettier": "3.4.2",
+    "typescript": "5.7.2"
+  },
   "engines": {
     "homebridge": ">=0.4.50",
     "node": ">=12.0.0"
@@ -18,13 +26,17 @@
     "vicare"
   ],
   "license": "ISC",
-  "main": "index.js",
+  "main": "dist/index.js",
   "name": "homebridge-vicare-2",
   "peerDependencies": {
     "hap-nodejs": ">=0.4.50",
     "homebridge": ">=0.4.50"
   },
+  "prettier": "@ffflorian/prettier-config",
   "scripts": {
+    "build": "tsc",
+    "dist": "rm -rf dist && yarn build",
+    "format": "prettier --write src/*.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "type": "module",

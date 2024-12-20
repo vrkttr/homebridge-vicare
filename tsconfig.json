@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "alwaysStrict": true,
+    "declaration": false,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["ESNext"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "sourceMap": false,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "target": "ES6"
+  },
+  "exclude": ["dist", "node_modules"]
+}
