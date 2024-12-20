@@ -1,3 +1,10 @@
+## [2.2.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.2...v2.2.3) (2024-12-20)
+
+
+### Bug Fixes
+
+* Add happy setup message ([3d03ff8](https://github.com/ffflorian/homebridge-vicare-2/commit/3d03ff822b4f4c916f2bbb3bf006135aca47e596))
+
 ## [2.2.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.1...v2.2.2) (2024-12-20)
 
 
