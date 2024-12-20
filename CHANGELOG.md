@@ -1,3 +1,10 @@
+## [2.2.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.1...v2.2.2) (2024-12-20)
+
+
+### Bug Fixes
+
+* Don't move all logs to debug ([c57cebe](https://github.com/ffflorian/homebridge-vicare-2/commit/c57cebecc6760ec092e633bbaf32ac5d73be54cb))
+
 ## [2.2.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.0...v2.2.1) (2024-12-20)
 
 
