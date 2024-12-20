@@ -87,9 +87,9 @@ class ViCareThermostatPlatform {
         this.log('Retrieved installation and gateway IDs.');
         this.installationId = installationId;
         this.gatewaySerial = gatewaySerial;
-        this.devices.forEach(deviceConfig => {
+        for (const deviceConfig of this.devices) {
           this.addAccessory(deviceConfig);
-        });
+        }
         this.retrieveSmartComponents();
       } catch (err) {
         this.log('Error retrieving installation or gateway IDs:', err);
@@ -241,6 +241,7 @@ class ViCareThermostatPlatform {
     };
 
     this.log('Retrieving smart components...');
+
     request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannSmartComponent[]>) => {
       if (error || response.statusCode !== 200) {
         this.log('Error retrieving smart components:', error || body);
@@ -248,11 +249,11 @@ class ViCareThermostatPlatform {
       }
 
       this.log('Successfully retrieved smart components:', body);
-      body.data.forEach(component => {
+      for (const component of body.data) {
         this.log(
           `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
         );
-      });
+      }
     });
   }
 
@@ -310,13 +311,13 @@ class ViCareThermostatPlatform {
       .setCharacteristic(Characteristic.Model, 'ViCare')
       .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
 
-    vicareAccessory.getServices().forEach(service => {
+    for (const service of vicareAccessory.getServices()) {
       const existingService = accessory.getServiceById(service.UUID, service.subtype!);
       if (existingService) {
         accessory.removeService(existingService);
       }
       accessory.addService(service);
-    });
+    }
 
     this.api.updatePlatformAccessories([accessory]);
   }
@@ -429,7 +430,7 @@ class ViCareThermostatAccessory {
         (error, response, body) => {
           if (!error && response.statusCode === 200) {
             const data: ViessmannFeature<boolean> = body.data || body;
-            if (data.properties && data.properties.active && data.properties.active.value !== undefined) {
+            if (data.properties?.active?.value !== undefined) {
               const isActive = data.properties.active.value;
               resolve({isActive});
             } else {
