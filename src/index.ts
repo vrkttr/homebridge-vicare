@@ -80,7 +80,13 @@ class ViCareThermostatPlatform {
         return;
       }
 
-      this.log('Authentication successful, received access token.');
+      if (this.accessToken) {
+        this.log('Authentication successful, received access token.');
+      } else {
+        this.log('Authentication did not succeed, received no access token.');
+        return;
+      }
+
       try {
         const {installationId, gatewaySerial} = await this.retrieveIds();
         this.log('Retrieved installation and gateway IDs.');
