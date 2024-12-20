@@ -179,7 +179,7 @@ class ViCareThermostatPlatform {
 
           this.log('Successfully exchanged code for access token.');
           const tokenResponse = JSON.parse(body);
-          resolve(tokenResponse.access_token);
+          resolve({accessToken: tokenResponse.access_token});
         }
       )
     );
