@@ -309,8 +309,11 @@ class ViCareThermostatAccessory {
       (error, response, body) => {
         if (!error && response.statusCode === 200) {
           const data = body.data || body;
-          if (data.properties && data.properties.value && data.properties.value.value !== undefined) {
+          if (data.properties?.value?.value !== undefined) {
             const temp = data.properties.value.value;
+            callback(null, temp);
+          } else if (data.properties?.temperature?.value !== undefined) {
+            const temp = data.properties.temperature.value;
             callback(null, temp);
           } else {
             this.log('Unexpected response structure:', data);
