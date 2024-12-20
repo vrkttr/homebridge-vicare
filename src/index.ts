@@ -98,6 +98,8 @@ class ViCareThermostatPlatform {
       } catch (err) {
         this.log.error('Error retrieving installation or gateway IDs:', err);
       }
+
+      this.log('All set up! ✨');
     });
   }
 
