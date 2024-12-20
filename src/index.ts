@@ -89,12 +89,15 @@ class ViCareThermostatPlatform {
       try {
         const {installationId, gatewaySerial} = await this.retrieveIds();
         this.log('Retrieved installation and gateway IDs.');
+
         this.installationId = installationId;
         this.gatewaySerial = gatewaySerial;
+
         for (const deviceConfig of this.devices) {
           this.addAccessory(deviceConfig);
         }
-        this.retrieveSmartComponents();
+
+        await this.retrieveSmartComponents();
       } catch (err) {
         this.log.error('Error retrieving installation or gateway IDs:', err);
       }
@@ -238,7 +241,7 @@ class ViCareThermostatPlatform {
     );
   }
 
-  private retrieveSmartComponents() {
+  private retrieveSmartComponents(): Promise<void> {
     const options = {
       url: `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`,
       headers: {
@@ -249,20 +252,23 @@ class ViCareThermostatPlatform {
 
     this.log.debug('Retrieving smart components...');
 
-    request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannSmartComponent[]>) => {
-      if (error || response.statusCode !== 200) {
-        this.log.error('Error retrieving smart components:', error || body);
-        return;
-      }
+    return new Promise(resolve =>
+      request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannSmartComponent[]>) => {
+        if (error || response.statusCode !== 200) {
+          this.log.error('Error retrieving smart components:', error || body);
+          return;
+        }
 
-      this.log.debug('Successfully retrieved smart components.');
-      this.log.debug(JSON.stringify(body, null, 2));
-      for (const component of body.data) {
-        this.log.debug(
-          `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
-        );
-      }
-    });
+        this.log.debug('Successfully retrieved smart components.');
+        this.log.debug(JSON.stringify(body, null, 2));
+        for (const component of body.data) {
+          this.log.debug(
+            `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
+          );
+        }
+        resolve();
+      })
+    );
   }
 
   private selectSmartComponents(
