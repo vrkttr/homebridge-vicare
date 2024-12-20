@@ -388,38 +388,36 @@ class ViCareThermostatAccessory {
     return this.services;
   }
 
-  private getTemperature(): Promise<{temp: number | string}> {
+  private getTemperature(callback: (err: Error | null, temp?: number | string) => void): void {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
     this.log.debug(`Fetching temperature from ${url}`);
 
-    return new Promise((resolve, reject) =>
-      request.get(
-        {
-          url: url,
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-          json: true,
+    request.get(
+      {
+        url: url,
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
         },
-        (error, response, body: ViessmannAPIResponse<ViessmannFeature<number>>) => {
-          if (!error && response.statusCode === 200) {
-            const data = body.data || body;
-            if (data.properties?.value?.value !== undefined) {
-              const temp = data.properties.value.value;
-              resolve({temp});
-            } else if (data.properties?.temperature?.value !== undefined) {
-              const temp = data.properties.temperature.value;
-              resolve({temp});
-            } else {
-              this.log.error('Unexpected response structure:', data);
-              reject(new Error('Unexpected response structure.'));
-            }
+        json: true,
+      },
+      (error, response, body: ViessmannAPIResponse<ViessmannFeature<number>>) => {
+        if (!error && response.statusCode === 200) {
+          const data = body.data || body;
+          if (data.properties?.value?.value !== undefined) {
+            const temp = data.properties.value.value;
+            callback(null, temp);
+          } else if (data.properties?.temperature?.value !== undefined) {
+            const temp = data.properties.temperature.value;
+            callback(null, temp);
           } else {
-            this.log.error('Error fetching temperature:', error || body);
-            reject(error || new Error(JSON.stringify(body)));
+            this.log.error('Unexpected response structure:', data);
+            callback(new Error('Unexpected response structure.'));
           }
+        } else {
+          this.log.error('Error fetching temperature:', error || body);
+          callback(error || new Error(JSON.stringify(body)));
         }
-      )
+      }
     );
   }
 
