@@ -1,3 +1,10 @@
+## [2.1.35](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.1.34...v2.1.35) (2024-12-20)
+
+
+### Bug Fixes
+
+* put accessToken into object ([1159033](https://github.com/ffflorian/homebridge-vicare-2/commit/1159033f85c5ce68667f9e4e282829c41de618da))
+
 ## [2.1.34](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.1.33...v2.1.34) (2024-12-20)
 
 
