@@ -47,6 +47,7 @@
   "release": {
     "extends": "@ffflorian/semantic-release-config"
   },
+  "repository": "https://github.com/ffflorian/homebridge-vicare-2.git",
   "scripts": {
     "build": "tsc",
     "dist": "rm -rf dist && yarn build",
