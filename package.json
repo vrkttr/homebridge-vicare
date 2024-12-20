@@ -19,7 +19,7 @@
   ],
   "license": "ISC",
   "main": "index.js",
-  "name": "homebridge-vicare",
+  "name": "homebridge-vicare-2",
   "peerDependencies": {
     "hap-nodejs": ">=0.4.50",
     "homebridge": ">=0.4.50"
