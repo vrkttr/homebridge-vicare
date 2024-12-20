@@ -39,21 +39,20 @@ export default (homebridge: HomebridgeAPI) => {
 
 class ViCareThermostatPlatform {
   private readonly accessories: HomebridgePlatformAccessory[];
-  private accessToken?: string;
   private readonly api: HomebridgeAPI;
   private readonly apiEndpoint: string;
   private readonly clientId: string;
   private readonly codeChallenge: string;
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalConfig>;
+  private readonly log: HomebridgeLogging;
+  private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
   private installationId?: number;
-  private readonly log: HomebridgeLogging;
   private redirectUri?: string;
   private server: http.Server | null;
-
-  config: HomebridgePlatformConfig & LocalConfig;
+  public config: HomebridgePlatformConfig & LocalConfig;
 
   constructor(log: HomebridgeLogging, config: HomebridgePlatformConfig & LocalConfig, api: HomebridgeAPI) {
     this.log = log;
@@ -97,19 +96,19 @@ class ViCareThermostatPlatform {
     });
   }
 
-  configureAccessory(accessory: HomebridgePlatformAccessory) {
+  public configureAccessory(accessory: HomebridgePlatformAccessory) {
     this.accessories.push(accessory);
   }
 
-  generateCodeVerifier() {
+  private generateCodeVerifier() {
     return crypto.randomBytes(32).toString('base64url');
   }
 
-  generateCodeChallenge(codeVerifier: string) {
+  private generateCodeChallenge(codeVerifier: string) {
     return crypto.createHash('sha256').update(codeVerifier).digest('base64url');
   }
 
-  authenticate(): Promise<{accessToken: string}> {
+  private authenticate(): Promise<{accessToken: string}> {
     const authUrl = `https://iam.viessmann.com/idp/v3/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri!)}&scope=IoT%20User%20offline_access&response_type=code&code_challenge_method=S256&code_challenge=${this.codeChallenge}`;
 
     this.log(`Opening browser for authentication: ${authUrl}`);
@@ -118,7 +117,7 @@ class ViCareThermostatPlatform {
     return this.startServer();
   }
 
-  startServer(): Promise<{accessToken: string}> {
+  private startServer(): Promise<{accessToken: string}> {
     return new Promise((resolve, reject) => {
       this.server = http
         .createServer((req, res) => {
@@ -145,7 +144,7 @@ class ViCareThermostatPlatform {
     });
   }
 
-  exchangeCodeForToken(authCode: string): Promise<{accessToken: string}> {
+  private exchangeCodeForToken(authCode: string): Promise<{accessToken: string}> {
     const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
     const params = {
       client_id: this.clientId,
@@ -180,7 +179,7 @@ class ViCareThermostatPlatform {
     );
   }
 
-  retrieveIds(): Promise<{installationId: number; gatewaySerial: string}> {
+  private retrieveIds(): Promise<{installationId: number; gatewaySerial: string}> {
     const options = {
       url: `${this.apiEndpoint}/equipment/installations`,
       headers: {
@@ -190,6 +189,7 @@ class ViCareThermostatPlatform {
     };
 
     this.log('Retrieving installation IDs...');
+
     return new Promise((resolve, reject) =>
       request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannInstallation[]>) => {
         if (error || response.statusCode !== 200) {
@@ -231,7 +231,7 @@ class ViCareThermostatPlatform {
     );
   }
 
-  retrieveSmartComponents() {
+  private retrieveSmartComponents() {
     const options = {
       url: `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`,
       headers: {
@@ -257,7 +257,9 @@ class ViCareThermostatPlatform {
     });
   }
 
-  selectSmartComponents(componentIds: string[]): Promise<{result: ViessmannAPIResponse<ViessmannSmartComponent[]>}> {
+  private selectSmartComponents(
+    componentIds: string[]
+  ): Promise<{result: ViessmannAPIResponse<ViessmannSmartComponent[]>}> {
     const options = {
       url: `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`,
       headers: {
@@ -283,7 +285,7 @@ class ViCareThermostatPlatform {
     );
   }
 
-  addAccessory(deviceConfig: HomebridgePlatformConfig & LocalConfig): void {
+  private addAccessory(deviceConfig: HomebridgePlatformConfig & LocalConfig): void {
     const uuid = UUIDGen.generate(deviceConfig.name!);
     let accessory = this.accessories.find(acc => acc.UUID === uuid);
 
@@ -379,7 +381,11 @@ class ViCareThermostatAccessory {
     }
   }
 
-  getTemperature(): Promise<{temp: number | string}> {
+  public getServices() {
+    return this.services;
+  }
+
+  private getTemperature(): Promise<{temp: number | string}> {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
     this.log(`Fetching temperature from ${url}`);
 
@@ -414,7 +420,7 @@ class ViCareThermostatAccessory {
     );
   }
 
-  getBurnerStatus(): Promise<{isActive: boolean}> {
+  private getBurnerStatus(): Promise<{isActive: boolean}> {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
     this.log(`Fetching burner status from ${url}`);
 
@@ -446,11 +452,7 @@ class ViCareThermostatAccessory {
     );
   }
 
-  setBurnerStatus(_value: HomebridgeCharacteristicValue, callback: HomebridgeCharacteristicSetCallback) {
+  private setBurnerStatus(_value: HomebridgeCharacteristicValue, callback: HomebridgeCharacteristicSetCallback) {
     callback(null);
-  }
-
-  getServices() {
-    return this.services;
   }
 }
