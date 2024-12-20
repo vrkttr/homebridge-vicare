@@ -4,7 +4,6 @@
   },
   "dependencies": {
     "internal-ip": "^7.0.0",
-    "open": "^8.2.1",
     "request": "^2.88.2"
   },
   "description": "Homebridge plugin for Viessmann ViCare",

@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
 import request from 'request';
-import open from 'open';
 import {internalIpV4} from 'internal-ip';
 import {
   API as HomebridgeAPI,
@@ -70,26 +69,26 @@ class ViCareThermostatPlatform {
       this.log('Starting authentication process...');
       this.hostIp = await internalIpV4();
       this.redirectUri = `http://${this.hostIp}:4200`;
-      this.log(`Using redirect URI: ${this.redirectUri}`);
+      this.log.debug(`Using redirect URI: ${this.redirectUri}`);
 
       try {
         const {accessToken} = await this.authenticate();
         this.accessToken = accessToken;
       } catch (err) {
-        this.log('Error during authentication:', err);
+        this.log.error('Error during authentication:', err);
         return;
       }
 
       if (this.accessToken) {
-        this.log('Authentication successful, received access token.');
+        this.log.debug('Authentication successful, received access token.');
       } else {
-        this.log('Authentication did not succeed, received no access token.');
+        this.log.error('Authentication did not succeed, received no access token.');
         return;
       }
 
       try {
         const {installationId, gatewaySerial} = await this.retrieveIds();
-        this.log('Retrieved installation and gateway IDs.');
+        this.log.debug('Retrieved installation and gateway IDs.');
         this.installationId = installationId;
         this.gatewaySerial = gatewaySerial;
         for (const deviceConfig of this.devices) {
@@ -97,7 +96,7 @@ class ViCareThermostatPlatform {
         }
         this.retrieveSmartComponents();
       } catch (err) {
-        this.log('Error retrieving installation or gateway IDs:', err);
+        this.log.error('Error retrieving installation or gateway IDs:', err);
       }
     });
   }
@@ -117,9 +116,7 @@ class ViCareThermostatPlatform {
   private authenticate(): Promise<{accessToken: string}> {
     const authUrl = `https://iam.viessmann.com/idp/v3/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri!)}&scope=IoT%20User%20offline_access&response_type=code&code_challenge_method=S256&code_challenge=${this.codeChallenge}`;
 
-    this.log(`Opening browser for authentication: ${authUrl}`);
-    open(authUrl);
-
+    this.log(`Click this link for authentication: ${authUrl}`);
     return this.startServer();
   }
 
@@ -130,7 +127,7 @@ class ViCareThermostatPlatform {
           const url = new URL(req.url!, `http://${req.headers.host}`);
           const authCode = url.searchParams.get('code');
           if (authCode) {
-            this.log('Received authorization code:', authCode);
+            this.log.debug('Received authorization code:', authCode);
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.end('Authorization successful. You can close this window.');
             this.exchangeCodeForToken(authCode)
@@ -145,7 +142,7 @@ class ViCareThermostatPlatform {
           }
         })
         .listen(4200, this.hostIp, () => {
-          this.log(`Server is listening on ${this.hostIp}:4200`);
+          this.log.debug(`Server is listening on ${this.hostIp}:4200`);
         });
     });
   }
@@ -160,7 +157,7 @@ class ViCareThermostatPlatform {
       code: authCode,
     };
 
-    this.log('Exchanging authorization code for access token...');
+    this.log.debug('Exchanging authorization code for access token...');
 
     return new Promise((resolve, reject) =>
       request.post(
@@ -171,14 +168,14 @@ class ViCareThermostatPlatform {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
         },
-        (error, response, body) => {
+        (error, response, body: string) => {
           if (error || response.statusCode !== 200) {
-            this.log('Error exchanging code for token:', error || body);
-            return reject(error || new Error(body));
+            this.log.error('Error exchanging code for token:', error || body);
+            return reject(error || new Error(JSON.stringify(body)));
           }
 
-          this.log('Successfully exchanged code for access token.');
-          const tokenResponse = JSON.parse(body);
+          this.log.debug('Successfully exchanged code for access token.');
+          const tokenResponse: {access_token: string} = JSON.parse(body);
           resolve({accessToken: tokenResponse.access_token});
         }
       )
@@ -194,16 +191,16 @@ class ViCareThermostatPlatform {
       json: true,
     };
 
-    this.log('Retrieving installation IDs...');
+    this.log.debug('Retrieving installation IDs...');
 
     return new Promise((resolve, reject) =>
       request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannInstallation[]>) => {
         if (error || response.statusCode !== 200) {
-          this.log('Error retrieving installations:', error || body);
+          this.log.error('Error retrieving installations:', error || body);
           return reject(error || new Error(JSON.stringify(body)));
         }
 
-        this.log('Successfully retrieved installations:', body);
+        this.log.debug('Successfully retrieved installations:', body);
         const installation = body.data[0];
         const installationId = installation.id;
 
@@ -215,17 +212,17 @@ class ViCareThermostatPlatform {
           json: true,
         };
 
-        this.log('Retrieving gateway IDs...');
+        this.log.debug('Retrieving gateway IDs...');
 
         request.get(gatewayOptions, (error, response, body: ViessmannAPIResponse<ViessmannGateway[]>) => {
           if (error || response.statusCode !== 200) {
-            this.log('Error retrieving gateways:', error || body);
+            this.log.error('Error retrieving gateways:', error || body);
             return reject(error || new Error(JSON.stringify(body)));
           }
 
-          this.log('Successfully retrieved gateways:', body);
+          this.log.debug('Successfully retrieved gateways:', body);
           if (!body.data || body.data.length === 0) {
-            this.log('No gateway data available.');
+            this.log.error('No gateway data available.');
             return reject(new Error('No gateway data available.'));
           }
 
@@ -246,17 +243,17 @@ class ViCareThermostatPlatform {
       json: true,
     };
 
-    this.log('Retrieving smart components...');
+    this.log.debug('Retrieving smart components...');
 
     request.get(options, (error, response, body: ViessmannAPIResponse<ViessmannSmartComponent[]>) => {
       if (error || response.statusCode !== 200) {
-        this.log('Error retrieving smart components:', error || body);
+        this.log.error('Error retrieving smart components:', error || body);
         return;
       }
 
-      this.log('Successfully retrieved smart components:', body);
+      this.log.debug('Successfully retrieved smart components:', body);
       for (const component of body.data) {
-        this.log(
+        this.log.debug(
           `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
         );
       }
@@ -275,17 +272,17 @@ class ViCareThermostatPlatform {
       body: JSON.stringify({selected: componentIds}),
     };
 
-    this.log('Selecting smart components...');
+    this.log.debug('Selecting smart components...');
 
     return new Promise((resolve, reject) =>
-      request.put(options, (error, response, body) => {
+      request.put(options, (error, response, body: string) => {
         if (error || response.statusCode !== 200) {
-          this.log('Error selecting smart components:', error || body);
+          this.log.error('Error selecting smart components:', error || body);
           return reject(error || new Error(body));
         }
 
         const result: ViessmannAPIResponse<ViessmannSmartComponent[]> = JSON.parse(body);
-        this.log('Successfully selected smart components:', result);
+        this.log.debug('Successfully selected smart components:', result);
         resolve({result});
       })
     );
@@ -299,7 +296,7 @@ class ViCareThermostatPlatform {
       accessory = new Accessory(deviceConfig.name!, uuid);
       this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
-      this.log(`Added new accessory: ${deviceConfig.name}`);
+      this.log.debug(`Added new accessory: ${deviceConfig.name}`);
     }
 
     const vicareAccessory = new ViCareThermostatAccessory(
@@ -393,7 +390,7 @@ class ViCareThermostatAccessory {
 
   private getTemperature(): Promise<{temp: number | string}> {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
-    this.log(`Fetching temperature from ${url}`);
+    this.log.debug(`Fetching temperature from ${url}`);
 
     return new Promise((resolve, reject) =>
       request.get(
@@ -414,11 +411,11 @@ class ViCareThermostatAccessory {
               const temp = data.properties.temperature.value;
               resolve({temp});
             } else {
-              this.log('Unexpected response structure:', data);
+              this.log.error('Unexpected response structure:', data);
               reject(new Error('Unexpected response structure.'));
             }
           } else {
-            this.log('Error fetching temperature:', error || body);
+            this.log.error('Error fetching temperature:', error || body);
             reject(error || new Error(JSON.stringify(body)));
           }
         }
@@ -428,7 +425,7 @@ class ViCareThermostatAccessory {
 
   private getBurnerStatus(): Promise<{isActive: boolean}> {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
-    this.log(`Fetching burner status from ${url}`);
+    this.log.debug(`Fetching burner status from ${url}`);
 
     return new Promise((resolve, reject) =>
       request.get(
@@ -446,11 +443,11 @@ class ViCareThermostatAccessory {
               const isActive = data.properties.active.value;
               resolve({isActive});
             } else {
-              this.log('Unexpected response structure:', data);
+              this.log.error('Unexpected response structure:', data);
               reject(new Error('Unexpected response structure.'));
             }
           } else {
-            this.log('Error fetching burner status:', error || body);
+            this.log.error('Error fetching burner status:', error || body);
             reject(error || new Error(body));
           }
         }
