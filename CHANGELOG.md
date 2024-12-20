@@ -1,3 +1,10 @@
+## [2.2.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.3...v2.2.4) (2024-12-20)
+
+
+### Bug Fixes
+
+* wait for smart components to be retrieved ([a27ac97](https://github.com/ffflorian/homebridge-vicare-2/commit/a27ac97a33dffc9ccd1f220e42952be171a8c1d3))
+
 ## [2.2.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.2...v2.2.3) (2024-12-20)
 
 
