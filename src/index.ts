@@ -1,7 +1,7 @@
-import * as crypto from 'node:crypto';
-import * as http from 'node:http';
-import * as request from 'request';
-import * as open from 'open';
+import crypto from 'node:crypto';
+import http from 'node:http';
+import request from 'request';
+import open from 'open';
 import {internalIpV4} from 'internal-ip';
 import {
   API as HomebridgeAPI,
@@ -22,7 +22,7 @@ import type {
   ViessmannGateway,
   ViessmannSmartComponent,
   ViessmannFeature,
-} from './interfaces';
+} from './interfaces.js';
 
 let Service: typeof HomebridgeService;
 let Characteristic: typeof HomebridgeCharacteristic;
