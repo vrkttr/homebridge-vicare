@@ -44,6 +44,9 @@
     "homebridge": ">=0.4.50"
   },
   "prettier": "@ffflorian/prettier-config",
+  "release": {
+    "extends": "@ffflorian/semantic-release-config"
+  },
   "scripts": {
     "build": "tsc",
     "dist": "rm -rf dist && yarn build",
