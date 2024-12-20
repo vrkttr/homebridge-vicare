@@ -1,8 +1,7 @@
-declare module "bonjour-hap" {
-
+declare module 'bonjour-hap' {
   export const enum Protocols {
-    TCP = "tcp",
-    UDP = "udp",
+    TCP = 'tcp',
+    UDP = 'udp',
   }
 
   export type Nullable<T> = T | null;
@@ -27,7 +26,7 @@ declare module "bonjour-hap" {
 
   export type PublishOptions = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    category?: any,
+    category?: any;
     host?: string;
     name?: string;
     pincode?: string;
@@ -38,7 +37,7 @@ declare module "bonjour-hap" {
     type?: string;
     username?: string;
 
-    addUnsafeServiceEnumerationRecord?: boolean,
+    addUnsafeServiceEnumerationRecord?: boolean;
 
     restrictedAddresses?: string[];
     disabledIpv6?: boolean;
@@ -49,7 +48,6 @@ declare module "bonjour-hap" {
     unpublishAll(callback: () => void): void;
     destroy(): void;
   }
-
 
   export type MulticastOptions = {
     multicast?: boolean;

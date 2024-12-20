@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 99
+    assignees:
+      - ffflorian
+    versioning-strategy: increase
+    ignore:
+      - dependency-name: '@types/node'
+        versions:
+          - '> 22.x'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 99
+    assignees:
+      - ffflorian

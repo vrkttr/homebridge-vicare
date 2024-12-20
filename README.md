@@ -18,41 +18,43 @@ To use this plugin, you will need to create an API key by following these steps:
 1. **Create an Account**: Sign up for an account on the [Viessmann Developer Portal](https://app.developer.viessmann.com/).
 
 2. **Create a new client:**
-    - Log in to the Viessmann Developer Portal.
-    - Navigate to "Clients" and create a new client.
-    - Wait a few minutes for the client to be registered.
+
+   - Log in to the Viessmann Developer Portal.
+   - Navigate to "Clients" and create a new client.
+   - Wait a few minutes for the client to be registered.
 
 3. **Redirect URI Configuration:**
-    - Set the Redirect URI in the Developer Portal to `http://YOUR_LOCAL_IP:4200`. Replace `YOUR_LOCAL_IP` with the local IP address of the machine running Homebridge.
+
+   - Set the Redirect URI in the Developer Portal to `http://YOUR_LOCAL_IP:4200`. Replace `YOUR_LOCAL_IP` with the local IP address of the machine running Homebridge.
 
 4. **Update your Homebridge config.json:**
-    - Copy the `client_id` from your registered client in the Developer Portal.
-    - Update your `config.json` with the `client_id`:
+   - Copy the `client_id` from your registered client in the Developer Portal.
+   - Update your `config.json` with the `client_id`:
 
 ## Config
 
 ```json
 {
-    "platforms": [
+  "platforms": [
+    {
+      "platform": "ViCareThermostatPlatform",
+      "name": "ViCareThermostat",
+      "clientId": "YOUR CLIENT ID",
+      "apiEndpoint": "https://api.viessmann.com/iot/v1",
+      "devices": [
         {
-            "platform": "ViCareThermostatPlatform",
-            "name": "ViCareThermostat",
-            "clientId": "YOUR CLIENT ID",
-            "apiEndpoint": "https://api.viessmann.com/iot/v1",
-            "devices": [
-                {
-                    "name": "Supply temperature",
-                    "feature": "heating.circuits.0.sensors.temperature.supply",
-                    "deviceId": "0"
-                },
-                {
-                    "name": "Main DHW temperature",
-                    "feature": "heating.dhw.temperature.main",
-                    "deviceId": "0"
-                }
-            ]
+          "name": "Supply temperature",
+          "feature": "heating.circuits.0.sensors.temperature.supply",
+          "deviceId": "0"
+        },
+        {
+          "name": "Main DHW temperature",
+          "feature": "heating.dhw.temperature.main",
+          "deviceId": "0"
         }
-    ]
+      ]
+    }
+  ]
 }
 ```
 
