@@ -55,14 +55,3 @@ jobs:
           git config --global "user.name" "${GIT_AUTHOR_NAME}"
           REPO_URL="$(git remote get-url origin | sed -n "s/https:\/\/github.com\//https:\/\/${GIT_AUTHOR_NAME}:${GITHUB_TOKEN}@github.com\//p")"
           yarn release -r "${REPO_URL}"
-
-      - name: Release on GitHub
-        if: |
-          github.event_name != 'pull_request' &&
-          !startsWith(github.event.head_commit.message, 'chore(deps')
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        run: |
-          echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" > ~/.npmrc
-          sed -i -E "s/\"name\": \"([^@].+)/\"name\": \"@ffflorian\/\1/" package.json
-          npm publish --registry=https://npm.pkg.github.com || true
