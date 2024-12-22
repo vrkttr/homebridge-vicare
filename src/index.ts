@@ -100,9 +100,9 @@ class ViCareThermostatPlatform {
           this.accessToken = access_token;
           this.refreshToken = refresh_token;
           await this.saveLocalStorage({...this.localStorage, refreshToken: refresh_token});
-        } catch (err) {
-          this.log.error('Error during authentication:', err);
-          return;
+        } catch (error) {
+          this.log.error('Error during authentication:', error);
+          throw error;
         }
 
         if (this.accessToken) {
@@ -125,8 +125,9 @@ class ViCareThermostatPlatform {
         }
 
         await this.retrieveSmartComponents();
-      } catch (err) {
-        this.log.error('Error retrieving installation or gateway IDs:', err);
+      } catch (error) {
+        this.log.error('Error retrieving installation or gateway IDs:', error);
+        throw error;
       }
 
       this.log('All set up! ✨');
@@ -484,11 +485,11 @@ class ViCareThermostatAccessory {
       this.type === 'thermostat'
         ? new Service.Thermostat(
             this.name,
-            `thermostatService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
+            `thermostatService_${this.name}_${this.feature}_${UUIDGen.generate(`${this.name}${this.feature}`)}`
           )
         : new Service.TemperatureSensor(
             this.name,
-            `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
+            `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(`${this.name}${this.feature}`)}`
           );
 
     this.temperatureService
