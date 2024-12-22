@@ -1,3 +1,10 @@
+## [2.8.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.0...v2.8.1) (2024-12-22)
+
+
+### Bug Fixes
+
+* Use correct method for authorization request ([76070b4](https://github.com/ffflorian/homebridge-vicare-2/commit/76070b4b30695c52bfef379b15485cf2493d6dd3))
+
 # [2.8.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.4...v2.8.0) (2024-12-22)
 
 
