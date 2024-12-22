@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.4...v2.3.0) (2024-12-22)
+
+
+### Features
+
+* Add custom host IP ([157955d](https://github.com/ffflorian/homebridge-vicare-2/commit/157955d7f08b4bc62a216f2824b5bb595263b7c2))
+
 ## [2.2.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.3...v2.2.4) (2024-12-20)
 
 
