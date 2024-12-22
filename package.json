@@ -35,7 +35,7 @@
     "viessmann",
     "vicare"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "main": "dist/index.js",
   "name": "homebridge-vicare-2",
   "peerDependencies": {
