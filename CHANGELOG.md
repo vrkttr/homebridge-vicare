@@ -1,3 +1,10 @@
+## [2.4.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.1...v2.4.2) (2024-12-22)
+
+
+### Bug Fixes
+
+* Set default service type ([439ca7b](https://github.com/ffflorian/homebridge-vicare-2/commit/439ca7bf719306549c6251315fa8f72e32c1e7c0))
+
 ## [2.4.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.0...v2.4.1) (2024-12-22)
 
 
