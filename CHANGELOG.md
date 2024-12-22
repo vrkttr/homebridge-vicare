@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.0...v2.7.1) (2024-12-22)
+
+
+### Bug Fixes
+
+* storage path, save local storage ([8fada8d](https://github.com/ffflorian/homebridge-vicare-2/commit/8fada8d1f3d00822888aec789de3805834e70064))
+
 # [2.7.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.6.0...v2.7.0) (2024-12-22)
 
 
