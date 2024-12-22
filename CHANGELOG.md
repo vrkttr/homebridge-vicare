@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.5.0...v2.5.1) (2024-12-22)
+
+
+### Bug Fixes
+
+* Set current heating state to "heat" ([bdfdf17](https://github.com/ffflorian/homebridge-vicare-2/commit/bdfdf17cb7c7531c33ce93954f8f9c367e00dcd8))
+
 # [2.5.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.2...v2.5.0) (2024-12-22)
 
 
