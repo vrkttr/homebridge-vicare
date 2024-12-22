@@ -1,3 +1,5 @@
+import type {PlatformConfig as HomebridgePlatformConfig} from 'homebridge';
+
 export interface ViessmannAPIResponse<T> {
   data: T;
 }
@@ -81,14 +83,11 @@ export interface LocalDevice {
   deviceId: string;
 }
 
-export interface LocalPlatform {
-  platform: string;
-  name: string;
-  clientId: string;
-  apiEndpoint: string;
-  devices: LocalDevice[];
-}
-
 export interface LocalConfig {
-  platforms: LocalPlatform[];
+  apiEndpoint: string;
+  clientId: string;
+  devices: Array<HomebridgePlatformConfig & LocalDevice>;
+  hostIp?: string;
+  name: string;
+  platform: string;
 }

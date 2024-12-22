@@ -41,6 +41,7 @@ To use this plugin, you will need to create an API key by following these steps:
       "name": "ViCareThermostat",
       "clientId": "YOUR CLIENT ID",
       "apiEndpoint": "https://api.viessmann.com/iot/v1",
+      "hostIp": "YOUR HOST IP", // optional
       "devices": [
         {
           "name": "Supply temperature",

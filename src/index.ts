@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import http from 'node:http';
 import request from 'request';
 import {internalIpV4} from 'internal-ip';
-import {
+import type {
   API as HomebridgeAPI,
   Characteristic as HomebridgeCharacteristic,
   CharacteristicSetCallback as HomebridgeCharacteristicSetCallback,
@@ -21,6 +21,7 @@ import type {
   ViessmannGateway,
   ViessmannSmartComponent,
   ViessmannFeature,
+  LocalDevice,
 } from './interfaces.js';
 
 let Service: typeof HomebridgeService;
@@ -43,7 +44,7 @@ class ViCareThermostatPlatform {
   private readonly clientId: string;
   private readonly codeChallenge: string;
   private readonly codeVerifier: string;
-  private readonly devices: Array<HomebridgePlatformConfig & LocalConfig>;
+  private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
   private readonly log: HomebridgeLogging;
   private accessToken?: string;
   private gatewaySerial?: string;
@@ -67,7 +68,7 @@ class ViCareThermostatPlatform {
 
     this.api.on('didFinishLaunching', async () => {
       this.log('Starting authentication process...');
-      this.hostIp = await internalIpV4();
+      this.hostIp = config.hostIp || (await internalIpV4());
       this.redirectUri = `http://${this.hostIp}:4200`;
       this.log.debug(`Using redirect URI: ${this.redirectUri}`);
 
@@ -299,7 +300,7 @@ class ViCareThermostatPlatform {
     );
   }
 
-  private addAccessory(deviceConfig: HomebridgePlatformConfig & LocalConfig): void {
+  private addAccessory(deviceConfig: HomebridgePlatformConfig & LocalDevice): void {
     const uuid = UUIDGen.generate(deviceConfig.name!);
     let accessory = this.accessories.find(acc => acc.UUID === uuid);
 
