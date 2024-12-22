@@ -1,3 +1,10 @@
+## [2.7.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.3...v2.7.4) (2024-12-22)
+
+
+### Bug Fixes
+
+* Don't delete and re-add existing service ([b3017e8](https://github.com/ffflorian/homebridge-vicare-2/commit/b3017e833bb63c51a2e220a1906e9cf09b522ba2))
+
 ## [2.7.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.2...v2.7.3) (2024-12-22)
 
 
