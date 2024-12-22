@@ -1,3 +1,10 @@
+## [2.7.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.2...v2.7.3) (2024-12-22)
+
+
+### Bug Fixes
+
+* Wait for authorization refresh ([7aadede](https://github.com/ffflorian/homebridge-vicare-2/commit/7aadede9db1a06ef55aedd8408c4601c92a9dd30))
+
 ## [2.7.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.1...v2.7.2) (2024-12-22)
 
 
