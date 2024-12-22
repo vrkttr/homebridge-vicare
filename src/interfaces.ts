@@ -81,6 +81,7 @@ export interface LocalDevice {
   name: string;
   feature: string;
   deviceId: string;
+  type: 'thermostat' | 'temperature_sensor';
 }
 
 export interface LocalConfig {
@@ -90,5 +91,4 @@ export interface LocalConfig {
   hostIp?: string;
   name: string;
   platform: string;
-  type: 'thermostat' | 'temperature_sensor';
 }

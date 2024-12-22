@@ -46,7 +46,6 @@ class ViCareThermostatPlatform {
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
   private readonly log: HomebridgeLogging;
-  private type: 'temperature_sensor' | 'thermostat';
   private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
@@ -62,7 +61,6 @@ class ViCareThermostatPlatform {
     this.clientId = config.clientId;
     this.apiEndpoint = config.apiEndpoint;
     this.devices = config.devices;
-    this.type = config.type || 'temperature_sensor';
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
@@ -320,8 +318,7 @@ class ViCareThermostatPlatform {
       this.accessToken!,
       this.apiEndpoint,
       this.installationId!.toString(),
-      this.gatewaySerial!,
-      this.type
+      this.gatewaySerial!
     );
 
     accessory.context.deviceConfig = deviceConfig;
@@ -364,8 +361,7 @@ class ViCareThermostatAccessory {
     accessToken: string,
     apiEndpoint: string,
     installationId: string,
-    gatewaySerial: string,
-    type: 'temperature_sensor' | 'thermostat'
+    gatewaySerial: string
   ) {
     this.log = log;
     this.name = config.name;
@@ -375,7 +371,7 @@ class ViCareThermostatAccessory {
     this.deviceId = config.deviceId;
     this.installationId = installationId;
     this.gatewaySerial = gatewaySerial;
-    this.type = type;
+    this.type = config.type;
 
     this.temperatureService =
       this.type === 'temperature_sensor'
