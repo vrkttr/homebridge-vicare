@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.0...v2.4.1) (2024-12-22)
+
+
+### Bug Fixes
+
+* accessory type location in config ([bea0e12](https://github.com/ffflorian/homebridge-vicare-2/commit/bea0e1219384ffeb37661a1a526c679cc8daf1d5))
+
 # [2.4.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.3.0...v2.4.0) (2024-12-22)
 
 
