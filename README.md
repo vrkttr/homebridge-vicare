@@ -35,31 +35,31 @@ To use this plugin, you will need to create an API key by following these steps:
 
 ## Config
 
-```json
+```json5
 {
-  "platforms": [
+  platforms: [
     {
-      "platform": "ViCareThermostatPlatform",
-      "name": "ViCareThermostat",
-      "clientId": "YOUR CLIENT ID",
-      "apiEndpoint": "https://api.viessmann.com/iot/v1",
-      "hostIp": "YOUR HOST IP", // optional, default is the detected IP address
-      "devices": [
+      platform: 'ViCareThermostatPlatform',
+      name: 'ViCareThermostat',
+      clientId: 'YOUR CLIENT ID',
+      apiEndpoint: 'https://api.viessmann.com/iot/v1',
+      hostIp: 'YOUR HOST IP', // optional, default is the detected IP address
+      devices: [
         {
-          "name": "Supply temperature",
-          "feature": "heating.circuits.0.sensors.temperature.supply",
-          "deviceId": "0",
-          "type": "temperature_sensor" // optional
+          name: 'Supply temperature',
+          feature: 'heating.circuits.0.sensors.temperature.supply',
+          deviceId: '0',
+          type: 'temperature_sensor', // optional
         },
         {
-          "name": "Main DHW temperature",
-          "feature": "heating.dhw.temperature.main",
-          "deviceId": "0",
-          "type": "thermostat" // optional, default is "temperature_sensor"
-        }
-      ]
-    }
-  ]
+          name: 'Main DHW temperature',
+          feature: 'heating.dhw.temperature.main',
+          deviceId: '0',
+          type: 'thermostat', // optional, default is "temperature_sensor"
+        },
+      ],
+    },
+  ],
 }
 ```
 
