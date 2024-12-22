@@ -229,8 +229,6 @@ class ViCareThermostatPlatform {
 
     this.log.debug('Refreshing authorization ...');
 
-    this.log.debug('Sending data:', params);
-
     return new Promise((resolve, reject) =>
       request.post(
         {
@@ -434,11 +432,10 @@ class ViCareThermostatPlatform {
       .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
 
     for (const service of vicareAccessory.getServices()) {
-      const existingService = accessory.getServiceById(service.UUID, service.subtype!);
-      if (existingService) {
-        accessory.removeService(existingService);
+      const serviceExists = accessory.getServiceById(service.UUID, service.subtype!);
+      if (!serviceExists) {
+        accessory.addService(service);
       }
-      accessory.addService(service);
     }
 
     this.api.updatePlatformAccessories([accessory]);
