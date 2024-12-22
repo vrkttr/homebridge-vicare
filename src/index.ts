@@ -52,7 +52,8 @@ class ViCareThermostatPlatform {
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
   private readonly log: HomebridgeLogging;
-  private readonly localStorage: string;
+  private readonly localStoragePath: string;
+  private localStorage?: LocalStorage;
   private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
@@ -73,16 +74,20 @@ class ViCareThermostatPlatform {
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
     this.server = null;
-    this.localStorage = path.join(api.user.storagePath(), 'settings.json');
+    this.localStoragePath = path.join(api.user.storagePath(), 'homebridge-vicare-2-settings.json');
 
     this.log.debug('Loaded config', config);
 
     this.api.on('didFinishLaunching', async () => {
       const storage = await this.loadLocalStorage();
 
-      if (storage?.refreshToken) {
+      if (storage) {
+        this.localStorage = storage;
+      }
+
+      if (this.localStorage?.refreshToken) {
         this.log('Found refresh token in storage file 🙌');
-        this.refreshToken = storage.refreshToken;
+        this.refreshToken = this.localStorage.refreshToken;
         this.refreshAuth();
       } else {
         this.log('Starting authentication process...');
@@ -94,6 +99,7 @@ class ViCareThermostatPlatform {
           const {access_token, refresh_token} = await this.authenticate();
           this.accessToken = access_token;
           this.refreshToken = refresh_token;
+          await this.saveLocalStorage({...this.localStorage, refreshToken: refresh_token});
         } catch (err) {
           this.log.error('Error during authentication:', err);
           return;
@@ -131,6 +137,19 @@ class ViCareThermostatPlatform {
     this.accessories.push(accessory);
   }
 
+  private async saveLocalStorage(config: LocalStorage): Promise<void> {
+    this.log.debug('Saving local storage ...');
+
+    try {
+      await fs.writeFile(this.localStoragePath, JSON.stringify(config), 'utf-8');
+    } catch (error) {
+      this.log.warn('Error while saving local storage:', error);
+      return;
+    }
+
+    this.log.debug('Successfully saved local storage.');
+  }
+
   private async loadLocalStorage(): Promise<LocalStorage | null> {
     this.log.debug('Loading local storage ...');
 
@@ -138,21 +157,21 @@ class ViCareThermostatPlatform {
     let storage: LocalStorage | undefined;
 
     try {
-      storageFileRaw = await fs.readFile(this.localStorage, 'utf-8');
+      storageFileRaw = await fs.readFile(this.localStoragePath, 'utf-8');
     } catch {
       this.log.debug('No storage file found, creating ...');
-      await fs.writeFile(this.localStorage, '{}', 'utf-8');
+      await fs.writeFile(this.localStoragePath, '{}', 'utf-8');
     }
 
     if (storageFileRaw) {
       try {
         storage = JSON.parse(storageFileRaw);
       } catch {
-        this.log.warn(`Storage file "${this.localStorage}" is not valid JSON`);
+        this.log.warn(`Storage file "${this.localStoragePath}" is not valid JSON`);
       }
     } else {
       this.log.debug('No storage file found, creating ...');
-      await fs.writeFile(this.localStorage, '{}', 'utf-8');
+      await fs.writeFile(this.localStoragePath, '{}', 'utf-8');
     }
 
     return storage || null;
