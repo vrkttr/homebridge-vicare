@@ -4,6 +4,21 @@ export interface ViessmannAPIResponse<T> {
   data: T;
 }
 
+export interface ViessmannAPIError {
+  error: string;
+  errorType: string;
+  message: string;
+  statusCode: number;
+  viErrorId: string;
+}
+
+export interface ViessmannAuthorization {
+  access_token: string;
+  expires_in: number;
+  refresh_token: string;
+  token_type: string;
+}
+
 export interface ViessmannInstallation {
   accessLevel: string;
   aggregatedStatus: string;

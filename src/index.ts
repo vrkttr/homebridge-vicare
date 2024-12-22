@@ -23,6 +23,8 @@ import type {
   ViessmannSmartComponent,
   ViessmannFeature,
   LocalDevice,
+  ViessmannAuthorization,
+  ViessmannAPIError,
 } from './interfaces.js';
 
 let Service: typeof HomebridgeService;
@@ -52,6 +54,7 @@ class ViCareThermostatPlatform {
   private hostIp?: string;
   private installationId?: number;
   private redirectUri?: string;
+  private refreshToken?: string;
   private server: http.Server | null;
   public config: HomebridgePlatformConfig & LocalConfig;
 
@@ -76,8 +79,9 @@ class ViCareThermostatPlatform {
       this.log.debug(`Using redirect URI: ${this.redirectUri}`);
 
       try {
-        const {accessToken} = await this.authenticate();
-        this.accessToken = accessToken;
+        const {access_token, refresh_token} = await this.authenticate();
+        this.accessToken = access_token;
+        this.refreshToken = refresh_token;
       } catch (err) {
         this.log.error('Error during authentication:', err);
         return;
@@ -122,14 +126,14 @@ class ViCareThermostatPlatform {
     return crypto.createHash('sha256').update(codeVerifier).digest('base64url');
   }
 
-  private authenticate(): Promise<{accessToken: string}> {
+  private authenticate(): Promise<ViessmannAuthorization> {
     const authUrl = `https://iam.viessmann.com/idp/v3/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri!)}&scope=IoT%20User%20offline_access&response_type=code&code_challenge_method=S256&code_challenge=${this.codeChallenge}`;
 
     this.log(`Click this link for authentication: ${authUrl}`);
-    return this.startServer();
+    return this.getCodeViaServer();
   }
 
-  private startServer(): Promise<{accessToken: string}> {
+  private getCodeViaServer(): Promise<ViessmannAuthorization> {
     return new Promise((resolve, reject) => {
       this.server = http
         .createServer((req, res) => {
@@ -140,9 +144,9 @@ class ViCareThermostatPlatform {
             res.writeHead(200, {'Content-Type': 'text/plain'});
             res.end('Authorization successful. You can close this window.');
             this.exchangeCodeForToken(authCode)
-              .then(({accessToken}) => {
+              .then(auth => {
                 this.server!.close();
-                resolve({accessToken});
+                resolve(auth);
               })
               .catch(reject);
           } else {
@@ -156,7 +160,42 @@ class ViCareThermostatPlatform {
     });
   }
 
-  private exchangeCodeForToken(authCode: string): Promise<{accessToken: string}> {
+  private async refreshAuth(): Promise<ViessmannAuthorization> {
+    const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
+    const params = {
+      client_id: this.clientId,
+      grant_type: 'refresh_token',
+      refresh_token: this.refreshToken,
+    };
+
+    this.log.debug('Refreshing authorization ...');
+
+    return new Promise((resolve, reject) =>
+      request.post(
+        {
+          url: tokenUrl,
+          form: params,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+        (error, response, body: string) => {
+          if (error || response.statusCode !== 200) {
+            this.log.error('Error refreshing authorization:', error || body);
+            return reject(error || new Error(JSON.stringify(body, null, 2)));
+          }
+
+          this.log.debug('Successfully refreshed authorization.');
+
+          const tokenResponse: ViessmannAuthorization = JSON.parse(body);
+          this.accessToken = tokenResponse.access_token;
+          resolve(tokenResponse);
+        }
+      )
+    );
+  }
+
+  private exchangeCodeForToken(authCode: string): Promise<ViessmannAuthorization> {
     const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
     const params = {
       client_id: this.clientId,
@@ -184,8 +223,9 @@ class ViCareThermostatPlatform {
           }
 
           this.log.debug('Successfully exchanged code for access token.');
-          const tokenResponse: {access_token: string} = JSON.parse(body);
-          resolve({accessToken: tokenResponse.access_token});
+
+          const tokenResponse: ViessmannAuthorization = JSON.parse(body);
+          resolve(tokenResponse);
         }
       )
     );
@@ -321,7 +361,8 @@ class ViCareThermostatPlatform {
       this.accessToken!,
       this.apiEndpoint,
       this.installationId!.toString(),
-      this.gatewaySerial!
+      this.gatewaySerial!,
+      this.refreshAuth
     );
 
     accessory.context.deviceConfig = deviceConfig;
@@ -344,7 +385,6 @@ class ViCareThermostatPlatform {
 }
 
 class ViCareThermostatAccessory {
-  private readonly accessToken: string;
   private readonly apiEndpoint: string;
   private readonly deviceId: string;
   private readonly feature: string;
@@ -356,6 +396,8 @@ class ViCareThermostatAccessory {
   private readonly switchService?: HomebridgeService;
   private readonly temperatureService: HomebridgeService;
   private readonly type: 'temperature_sensor' | 'thermostat';
+  private readonly refreshAuth: () => Promise<ViessmannAuthorization>;
+  private accessToken: string;
 
   constructor(
     log: HomebridgeLogging,
@@ -364,7 +406,8 @@ class ViCareThermostatAccessory {
     accessToken: string,
     apiEndpoint: string,
     installationId: string,
-    gatewaySerial: string
+    gatewaySerial: string,
+    refreshAuth: () => Promise<ViessmannAuthorization>
   ) {
     this.log = log;
     this.name = config.name;
@@ -375,6 +418,7 @@ class ViCareThermostatAccessory {
     this.installationId = installationId;
     this.gatewaySerial = gatewaySerial;
     this.type = config.type || 'temperature_sensor';
+    this.refreshAuth = refreshAuth;
 
     this.temperatureService =
       this.type === 'thermostat'
@@ -462,7 +506,14 @@ class ViCareThermostatAccessory {
           }
         } else {
           this.log.error('Error fetching temperature:', error || body);
-          callback(error || new Error(JSON.stringify(body, null, 2)));
+          if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
+            this.refreshAuth().then(({access_token}) => {
+              this.accessToken = access_token;
+              this.getTemperature(callback);
+            });
+          } else {
+            callback(error || new Error(JSON.stringify(body, null, 2)));
+          }
         }
       }
     );
@@ -492,7 +543,14 @@ class ViCareThermostatAccessory {
           }
         } else {
           this.log.error('Error fetching burner status:', error || body);
-          callback(error || new Error(body));
+          if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
+            this.refreshAuth().then(({access_token}) => {
+              this.accessToken = access_token;
+              this.getTemperature(callback);
+            });
+          } else {
+            callback(error || new Error(JSON.stringify(body, null, 2)));
+          }
         }
       }
     );
