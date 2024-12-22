@@ -16,6 +16,8 @@ import {
   type uuid,
 } from 'homebridge';
 
+import {RequestService} from './RequestService.js';
+
 import type {
   LocalConfig,
   ViessmannAPIResponse,
@@ -25,7 +27,6 @@ import type {
   ViessmannFeature,
   LocalDevice,
   ViessmannAuthorization,
-  ViessmannAPIError,
   LocalStorage,
 } from './interfaces.js';
 
@@ -44,36 +45,33 @@ export default (homebridge: HomebridgeAPI) => {
 
 class ViCareThermostatPlatform {
   private readonly accessories: HomebridgePlatformAccessory[];
-  private readonly api: HomebridgeAPI;
   private readonly apiEndpoint: string;
   private readonly clientId: string;
   private readonly codeChallenge: string;
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
-  private readonly log: HomebridgeLogging;
   private readonly localStoragePath: string;
+  private requestService: RequestService;
   private localStorage?: LocalStorage;
-  private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
   private installationId?: number;
   private redirectUri?: string;
-  private refreshToken?: string;
-  private server: http.Server | null;
-  public config: HomebridgePlatformConfig & LocalConfig;
+  private server?: http.Server;
 
-  constructor(log: HomebridgeLogging, config: HomebridgePlatformConfig & LocalConfig, api: HomebridgeAPI) {
-    this.log = log;
-    this.config = config;
-    this.api = api;
+  constructor(
+    private readonly log: HomebridgeLogging,
+    public readonly config: HomebridgePlatformConfig & LocalConfig,
+    private readonly api: HomebridgeAPI
+  ) {
     this.clientId = config.clientId;
     this.apiEndpoint = config.apiEndpoint;
     this.devices = config.devices;
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
-    this.server = null;
     this.localStoragePath = path.join(api.user.storagePath(), 'homebridge-vicare-2-settings.json');
+    this.requestService = new RequestService(this.log, this.clientId);
 
     this.log.debug('Loaded config', config);
 
@@ -86,8 +84,8 @@ class ViCareThermostatPlatform {
 
       if (this.localStorage?.refreshToken) {
         this.log('Found refresh token in storage file 🙌');
-        this.refreshToken = this.localStorage.refreshToken;
-        await this.refreshAuth();
+        this.requestService.refreshToken = this.localStorage.refreshToken;
+        await this.requestService.refreshAuth();
       } else {
         this.log('Starting authentication process...');
         this.hostIp = config.hostIp || (await internalIpV4());
@@ -96,15 +94,15 @@ class ViCareThermostatPlatform {
 
         try {
           const {access_token, refresh_token} = await this.authenticate();
-          this.accessToken = access_token;
-          this.refreshToken = refresh_token;
+          this.requestService.accessToken = access_token;
+          this.requestService.refreshToken = refresh_token;
           await this.saveLocalStorage({...this.localStorage, refreshToken: refresh_token});
         } catch (error) {
           this.log.error('Error during authentication:', error);
           throw error;
         }
 
-        if (this.accessToken) {
+        if (this.requestService.accessToken) {
           this.log('Authentication successful, received access token.');
         } else {
           this.log.error('Authentication did not succeed, received no access token.');
@@ -227,79 +225,6 @@ class ViCareThermostatPlatform {
     });
   }
 
-  private async authorizedRequest(
-    url: string,
-    method: string = 'get',
-    config?: RequestInit,
-    triedTimes: number = 0
-  ): Promise<any> {
-    if (triedTimes >= 3) {
-      throw new Error('Could not refresh authentication token.');
-    }
-
-    try {
-      return await this.request(url, method, {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          ...config?.headers,
-        },
-        ...config,
-      });
-    } catch (error) {
-      if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
-        const {access_token} = await this.refreshAuth();
-        this.accessToken = access_token;
-        return await this.authorizedRequest(url, method, config, ++triedTimes);
-      }
-      throw error;
-    }
-  }
-
-  private async request(url: string, method: string, config?: RequestInit): Promise<any> {
-    return await fetch(url, {
-      headers: {
-        Accept: 'application/json',
-        ...config?.headers,
-      },
-      method,
-      ...config,
-    });
-  }
-
-  private async refreshAuth(): Promise<ViessmannAuthorization> {
-    const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
-
-    const params = new URLSearchParams();
-    params.set('client_id', this.clientId);
-    params.set('grant_type', 'refresh_token');
-    params.set('refresh_token', this.refreshToken!);
-
-    this.log.debug('Refreshing authorization ...');
-
-    try {
-      const response = await this.authorizedRequest(tokenUrl, 'post', {
-        body: params,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-
-      let tokenResponse = (await response.json()) as ViessmannAuthorization;
-
-      if (!response.ok) {
-        throw new Error(JSON.stringify(tokenResponse, null, 2));
-      }
-
-      this.log('Successfully refreshed authorization.');
-
-      this.accessToken = tokenResponse.access_token;
-      return tokenResponse;
-    } catch (error) {
-      this.log.error('Error refreshing authorization:', error);
-      throw error;
-    }
-  }
-
   private async exchangeCodeForToken(authCode: string): Promise<ViessmannAuthorization> {
     const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
 
@@ -313,7 +238,7 @@ class ViCareThermostatPlatform {
     this.log.debug('Exchanging authorization code for access token...');
 
     try {
-      const response = await this.request(tokenUrl, 'post', {
+      const response = await this.requestService.request(tokenUrl, 'post', {
         body: params,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -340,7 +265,7 @@ class ViCareThermostatPlatform {
     let installationId: number | undefined;
 
     try {
-      const response = await this.authorizedRequest(`${this.apiEndpoint}/equipment/installations`);
+      const response = await this.requestService.authorizedRequest(`${this.apiEndpoint}/equipment/installations`);
 
       const body = (await response.json()) as ViessmannAPIResponse<ViessmannInstallation[]>;
 
@@ -361,7 +286,7 @@ class ViCareThermostatPlatform {
 
     try {
       const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways`;
-      const response = await this.authorizedRequest(url, 'get');
+      const response = await this.requestService.authorizedRequest(url, 'get');
 
       const body = (await response.json()) as ViessmannAPIResponse<ViessmannGateway[]>;
 
@@ -391,7 +316,7 @@ class ViCareThermostatPlatform {
     const url = `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`;
 
     try {
-      const response = await this.authorizedRequest(url, 'get');
+      const response = await this.requestService.authorizedRequest(url, 'get');
 
       const body = (await response.json()) as ViessmannAPIResponse<ViessmannSmartComponent[]>;
 
@@ -420,7 +345,7 @@ class ViCareThermostatPlatform {
     const url = `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`;
 
     try {
-      const response = await this.authorizedRequest(url, 'put', {
+      const response = await this.requestService.authorizedRequest(url, 'put', {
         body: JSON.stringify({selected: componentIds}),
         headers: {
           'Content-Type': 'application/json',
@@ -449,16 +374,16 @@ class ViCareThermostatPlatform {
       accessory = new Accessory(deviceConfig.name!, uuid);
       this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
-      this.log.debug(`Added new accessory: ${deviceConfig.name}`);
+      this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
     }
 
     const vicareAccessory = new ViCareThermostatAccessory(
       this.log,
-      this.authorizedRequest,
-      deviceConfig,
+      this.requestService,
       this.apiEndpoint,
       this.installationId!.toString(),
-      this.gatewaySerial!
+      this.gatewaySerial!,
+      deviceConfig
     );
 
     accessory.context.deviceConfig = deviceConfig;
@@ -480,13 +405,8 @@ class ViCareThermostatPlatform {
 }
 
 class ViCareThermostatAccessory {
-  private readonly authorizedRequest: (url: string, method?: string, config?: RequestInit) => Promise<any>;
-  private readonly apiEndpoint: string;
   private readonly deviceId: string;
   private readonly feature: string;
-  private readonly gatewaySerial: string;
-  private readonly installationId: string;
-  private readonly log: HomebridgeLogging;
   private readonly maxTemp: number;
   private readonly name?: string;
   private readonly services: HomebridgeService[];
@@ -495,22 +415,17 @@ class ViCareThermostatAccessory {
   private readonly type: 'temperature_sensor' | 'thermostat';
 
   constructor(
-    log: HomebridgeLogging,
-    authorizedRequest: (url: string, method?: string, config?: RequestInit) => Promise<ViessmannAuthorization>,
-    config: HomebridgePlatformConfig & LocalDevice,
-    apiEndpoint: string,
-    installationId: string,
-    gatewaySerial: string
+    private readonly log: HomebridgeLogging,
+    private readonly requestService: RequestService,
+    private readonly apiEndpoint: string,
+    private readonly installationId: string,
+    private readonly gatewaySerial: string,
+    config: HomebridgePlatformConfig & LocalDevice
   ) {
-    this.log = log;
-    this.authorizedRequest = authorizedRequest;
     this.name = config.name;
     this.feature = config.feature;
-    this.apiEndpoint = apiEndpoint;
     this.deviceId = config.deviceId;
     this.maxTemp = config.maxTemp;
-    this.installationId = installationId;
-    this.gatewaySerial = gatewaySerial;
     this.type = config.type || 'temperature_sensor';
 
     this.temperatureService =
@@ -577,7 +492,7 @@ class ViCareThermostatAccessory {
     this.log.debug(`Fetching temperature from ${url} ...`);
 
     try {
-      const response = await this.authorizedRequest(url);
+      const response = await this.requestService.authorizedRequest(url);
 
       const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<number>>;
 
@@ -607,7 +522,7 @@ class ViCareThermostatAccessory {
     this.log.debug(`Fetching burner status from ${url} ...`);
 
     try {
-      const response = await this.authorizedRequest(url);
+      const response = await this.requestService.authorizedRequest(url);
 
       const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<boolean>>;
 
