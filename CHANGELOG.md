@@ -1,3 +1,10 @@
+# [2.8.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.4...v2.8.0) (2024-12-22)
+
+
+### Features
+
+* Use builtin fetch ([d762f5f](https://github.com/ffflorian/homebridge-vicare-2/commit/d762f5f25772c08a5ecbb39606ea12af2928467b))
+
 ## [2.7.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.3...v2.7.4) (2024-12-22)
 
 
