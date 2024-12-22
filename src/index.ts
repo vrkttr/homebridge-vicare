@@ -46,6 +46,7 @@ class ViCareThermostatPlatform {
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
   private readonly log: HomebridgeLogging;
+  private type: 'temperature_sensor' | 'thermostat';
   private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
@@ -61,6 +62,7 @@ class ViCareThermostatPlatform {
     this.clientId = config.clientId;
     this.apiEndpoint = config.apiEndpoint;
     this.devices = config.devices;
+    this.type = config.type || 'temperature_sensor';
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
@@ -318,7 +320,8 @@ class ViCareThermostatPlatform {
       this.accessToken!,
       this.apiEndpoint,
       this.installationId!.toString(),
-      this.gatewaySerial!
+      this.gatewaySerial!,
+      this.type
     );
 
     accessory.context.deviceConfig = deviceConfig;
@@ -352,6 +355,7 @@ class ViCareThermostatAccessory {
   private readonly services: HomebridgeService[];
   private readonly switchService?: HomebridgeService;
   private readonly temperatureService: HomebridgeService;
+  private readonly type: 'temperature_sensor' | 'thermostat';
 
   constructor(
     log: HomebridgeLogging,
@@ -360,7 +364,8 @@ class ViCareThermostatAccessory {
     accessToken: string,
     apiEndpoint: string,
     installationId: string,
-    gatewaySerial: string
+    gatewaySerial: string,
+    type: 'temperature_sensor' | 'thermostat'
   ) {
     this.log = log;
     this.name = config.name;
@@ -370,11 +375,19 @@ class ViCareThermostatAccessory {
     this.deviceId = config.deviceId;
     this.installationId = installationId;
     this.gatewaySerial = gatewaySerial;
+    this.type = type;
 
-    this.temperatureService = new Service.TemperatureSensor(
-      this.name,
-      `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
-    );
+    this.temperatureService =
+      this.type === 'temperature_sensor'
+        ? new Service.TemperatureSensor(
+            this.name,
+            `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
+          )
+        : new Service.Thermostat(
+            this.name,
+            `thermostatService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
+          );
+
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
       .on('get', this.getTemperature.bind(this));

@@ -90,4 +90,5 @@ export interface LocalConfig {
   hostIp?: string;
   name: string;
   platform: string;
+  type: 'thermostat' | 'temperature_sensor';
 }
