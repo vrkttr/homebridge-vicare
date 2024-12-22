@@ -88,7 +88,7 @@ class ViCareThermostatPlatform {
       if (this.localStorage?.refreshToken) {
         this.log('Found refresh token in storage file 🙌');
         this.refreshToken = this.localStorage.refreshToken;
-        this.refreshAuth();
+        await this.refreshAuth();
       } else {
         this.log('Starting authentication process...');
         this.hostIp = config.hostIp || (await internalIpV4());
@@ -228,6 +228,8 @@ class ViCareThermostatPlatform {
     };
 
     this.log.debug('Refreshing authorization ...');
+
+    this.log.debug('Sending data:', params);
 
     return new Promise((resolve, reject) =>
       request.post(
