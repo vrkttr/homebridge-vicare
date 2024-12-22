@@ -2,17 +2,17 @@ import crypto from 'node:crypto';
 import http from 'node:http';
 import request from 'request';
 import {internalIpV4} from 'internal-ip';
-import type {
-  CharacteristicGetCallback,
-  API as HomebridgeAPI,
-  Characteristic as HomebridgeCharacteristic,
-  CharacteristicSetCallback as HomebridgeCharacteristicSetCallback,
-  CharacteristicValue as HomebridgeCharacteristicValue,
-  Logging as HomebridgeLogging,
-  PlatformAccessory as HomebridgePlatformAccessory,
-  PlatformConfig as HomebridgePlatformConfig,
-  Service as HomebridgeService,
-  uuid,
+import {
+  type CharacteristicGetCallback,
+  type API as HomebridgeAPI,
+  type Characteristic as HomebridgeCharacteristic,
+  type CharacteristicSetCallback as HomebridgeCharacteristicSetCallback,
+  type CharacteristicValue as HomebridgeCharacteristicValue,
+  type Logging as HomebridgeLogging,
+  type PlatformAccessory as HomebridgePlatformAccessory,
+  type PlatformConfig as HomebridgePlatformConfig,
+  type Service as HomebridgeService,
+  type uuid,
 } from 'homebridge';
 
 import type {
@@ -391,6 +391,7 @@ class ViCareThermostatAccessory {
   private readonly gatewaySerial: string;
   private readonly installationId: string;
   private readonly log: HomebridgeLogging;
+  private readonly maxTemp: number;
   private readonly name?: string;
   private readonly services: HomebridgeService[];
   private readonly switchService?: HomebridgeService;
@@ -401,7 +402,7 @@ class ViCareThermostatAccessory {
 
   constructor(
     log: HomebridgeLogging,
-    config: HomebridgePlatformConfig,
+    config: HomebridgePlatformConfig & LocalDevice,
     _api: HomebridgeAPI,
     accessToken: string,
     apiEndpoint: string,
@@ -415,6 +416,7 @@ class ViCareThermostatAccessory {
     this.apiEndpoint = apiEndpoint;
     this.accessToken = accessToken;
     this.deviceId = config.deviceId;
+    this.maxTemp = config.maxTemp;
     this.installationId = installationId;
     this.gatewaySerial = gatewaySerial;
     this.type = config.type || 'temperature_sensor';
@@ -440,7 +442,7 @@ class ViCareThermostatAccessory {
 
     this.temperatureService.getCharacteristic(Characteristic.TargetTemperature).setProps({
       minValue: 0,
-      maxValue: 38,
+      maxValue: this.maxTemp,
       minStep: 1,
     });
 

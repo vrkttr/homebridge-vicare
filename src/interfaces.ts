@@ -104,6 +104,7 @@ export interface LocalConfig {
   clientId: string;
   devices: Array<HomebridgePlatformConfig & LocalDevice>;
   hostIp?: string;
+  maxTemp?: number;
   name: string;
   platform: string;
 }

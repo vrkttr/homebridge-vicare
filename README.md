@@ -55,6 +55,7 @@ To use this plugin, you will need to create an API key by following these steps:
           name: 'Main DHW temperature',
           feature: 'heating.dhw.temperature.main',
           deviceId: '0',
+          maxTemp: 38, // optional
           type: 'thermostat', // optional, default is "temperature_sensor"
         },
       ],
