@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.5.1...v2.6.0) (2024-12-22)
+
+
+### Features
+
+* Add automatic authorization refresh ([a85f8d8](https://github.com/ffflorian/homebridge-vicare-2/commit/a85f8d866dca3f1b6b1b2ae250709ffd46840bb4))
+
 ## [2.5.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.5.0...v2.5.1) (2024-12-22)
 
 
