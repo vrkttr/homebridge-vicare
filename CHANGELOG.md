@@ -1,3 +1,11 @@
+# [2.7.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.6.0...v2.7.0) (2024-12-22)
+
+
+### Features
+
+* Add local storage to store refresh token ([823c8c2](https://github.com/ffflorian/homebridge-vicare-2/commit/823c8c2d7e7af9a9095864d64c8de165372db918))
+* Add maximum temperature setting ([0ba1a8c](https://github.com/ffflorian/homebridge-vicare-2/commit/0ba1a8c030c5391dc0736767603c2bd5c54cd2fe))
+
 # [2.6.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.5.1...v2.6.0) (2024-12-22)
 
 
