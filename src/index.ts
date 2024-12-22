@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
+import {promises as fs} from 'node:fs';
+import path from 'node:path';
 import request from 'request';
 import {internalIpV4} from 'internal-ip';
 import {
@@ -25,6 +27,7 @@ import type {
   LocalDevice,
   ViessmannAuthorization,
   ViessmannAPIError,
+  LocalStorage,
 } from './interfaces.js';
 
 let Service: typeof HomebridgeService;
@@ -49,6 +52,7 @@ class ViCareThermostatPlatform {
   private readonly codeVerifier: string;
   private readonly devices: Array<HomebridgePlatformConfig & LocalDevice>;
   private readonly log: HomebridgeLogging;
+  private readonly localStorage: string;
   private accessToken?: string;
   private gatewaySerial?: string;
   private hostIp?: string;
@@ -69,29 +73,38 @@ class ViCareThermostatPlatform {
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
     this.server = null;
+    this.localStorage = path.join(api.user.storagePath(), 'settings.json');
 
     this.log.debug('Loaded config', config);
 
     this.api.on('didFinishLaunching', async () => {
-      this.log('Starting authentication process...');
-      this.hostIp = config.hostIp || (await internalIpV4());
-      this.redirectUri = `http://${this.hostIp}:4200`;
-      this.log.debug(`Using redirect URI: ${this.redirectUri}`);
+      const storage = await this.loadLocalStorage();
 
-      try {
-        const {access_token, refresh_token} = await this.authenticate();
-        this.accessToken = access_token;
-        this.refreshToken = refresh_token;
-      } catch (err) {
-        this.log.error('Error during authentication:', err);
-        return;
-      }
-
-      if (this.accessToken) {
-        this.log('Authentication successful, received access token.');
+      if (storage?.refreshToken) {
+        this.log('Found refresh token in storage file 🙌');
+        this.refreshToken = storage.refreshToken;
+        this.refreshAuth();
       } else {
-        this.log.error('Authentication did not succeed, received no access token.');
-        return;
+        this.log('Starting authentication process...');
+        this.hostIp = config.hostIp || (await internalIpV4());
+        this.redirectUri = `http://${this.hostIp}:4200`;
+        this.log.debug(`Using redirect URI: ${this.redirectUri}`);
+
+        try {
+          const {access_token, refresh_token} = await this.authenticate();
+          this.accessToken = access_token;
+          this.refreshToken = refresh_token;
+        } catch (err) {
+          this.log.error('Error during authentication:', err);
+          return;
+        }
+
+        if (this.accessToken) {
+          this.log('Authentication successful, received access token.');
+        } else {
+          this.log.error('Authentication did not succeed, received no access token.');
+          return;
+        }
       }
 
       try {
@@ -116,6 +129,33 @@ class ViCareThermostatPlatform {
 
   public configureAccessory(accessory: HomebridgePlatformAccessory) {
     this.accessories.push(accessory);
+  }
+
+  private async loadLocalStorage(): Promise<LocalStorage | null> {
+    this.log.debug('Loading local storage ...');
+
+    let storageFileRaw: string | undefined;
+    let storage: LocalStorage | undefined;
+
+    try {
+      storageFileRaw = await fs.readFile(this.localStorage, 'utf-8');
+    } catch {
+      this.log.debug('No storage file found, creating ...');
+      await fs.writeFile(this.localStorage, '{}', 'utf-8');
+    }
+
+    if (storageFileRaw) {
+      try {
+        storage = JSON.parse(storageFileRaw);
+      } catch {
+        this.log.warn(`Storage file "${this.localStorage}" is not valid JSON`);
+      }
+    } else {
+      this.log.debug('No storage file found, creating ...');
+      await fs.writeFile(this.localStorage, '{}', 'utf-8');
+    }
+
+    return storage || null;
   }
 
   private generateCodeVerifier() {

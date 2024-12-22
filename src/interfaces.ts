@@ -108,3 +108,7 @@ export interface LocalConfig {
   name: string;
   platform: string;
 }
+
+export interface LocalStorage {
+  refreshToken?: string;
+}
