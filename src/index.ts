@@ -552,9 +552,9 @@ class ViCareThermostatAccessory {
         },
         json: true,
       },
-      (error, response, body: ViessmannAPIResponse<ViessmannFeature<number>>) => {
+      (error, response, body: ViessmannAPIResponse<ViessmannFeature<number>> | ViessmannAPIError) => {
         if (!error && response.statusCode === 200) {
-          const data = body.data || body;
+          const data = (body as ViessmannAPIResponse<ViessmannFeature<number>>).data || body;
           if (data.properties?.value?.value !== undefined) {
             const temp = data.properties.value.value;
             callback(null, temp);
@@ -567,7 +567,8 @@ class ViCareThermostatAccessory {
           }
         } else {
           this.log.error('Error fetching temperature:', error || body);
-          if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
+          let errorCode = error.error || (body as ViessmannAPIError).error;
+          if (errorCode === 'EXPIRED TOKEN') {
             this.refreshAuth().then(({access_token}) => {
               this.accessToken = access_token;
               this.getTemperature(callback);
@@ -592,9 +593,9 @@ class ViCareThermostatAccessory {
         },
         json: true,
       },
-      (error, response, body) => {
+      (error, response, body: ViessmannAPIResponse<ViessmannFeature<boolean>> | ViessmannAPIError) => {
         if (!error && response.statusCode === 200) {
-          const data: ViessmannFeature<boolean> = body.data || body;
+          const data = (body as ViessmannAPIResponse<ViessmannFeature<boolean>>).data || body;
           if (data.properties?.active?.value !== undefined) {
             const isActive = data.properties.active.value;
             callback(null, isActive);
@@ -604,10 +605,11 @@ class ViCareThermostatAccessory {
           }
         } else {
           this.log.error('Error fetching burner status:', error || body);
-          if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
+          let errorCode = error.error || (body as ViessmannAPIError).error;
+          if (errorCode === 'EXPIRED TOKEN') {
             this.refreshAuth().then(({access_token}) => {
               this.accessToken = access_token;
-              this.getTemperature(callback);
+              this.getBurnerStatus(callback);
             });
           } else {
             callback(error || new Error(JSON.stringify(body, null, 2)));
