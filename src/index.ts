@@ -389,7 +389,23 @@ class ViCareThermostatAccessory {
 
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
+      .setProps({
+        minStep: 1,
+      })
       .on('get', this.getTemperature.bind(this));
+
+    this.temperatureService.getCharacteristic(Characteristic.TargetTemperature).setProps({
+      minValue: 0,
+      maxValue: 38,
+      minStep: 1,
+    });
+
+    // TODO: Once changing to eco mode is enabled, add `Characteristic.TargetHeatingCoolingState.OFF`
+    this.temperatureService.getCharacteristic(Characteristic.TargetHeatingCoolingState).setProps({
+      minValue: Characteristic.TargetHeatingCoolingState.HEAT,
+      maxValue: Characteristic.TargetHeatingCoolingState.HEAT,
+      validValues: [Characteristic.TargetHeatingCoolingState.HEAT],
+    });
 
     if (config.feature.includes('burners')) {
       this.switchService = new Service.Switch(
