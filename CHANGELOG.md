@@ -1,3 +1,10 @@
+## [2.7.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.1...v2.7.2) (2024-12-22)
+
+
+### Bug Fixes
+
+* Read error code from body ([3024763](https://github.com/ffflorian/homebridge-vicare-2/commit/302476379d6c3e0ead6fdb96d794d491d3da4d67))
+
 ## [2.7.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.7.0...v2.7.1) (2024-12-22)
 
 

@@ -57,5 +57,5 @@
     "test": "yarn prettier --list-different"
   },
   "type": "module",
-  "version": "2.7.1"
+  "version": "2.7.2"
 }
