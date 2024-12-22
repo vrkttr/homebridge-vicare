@@ -277,7 +277,7 @@ class ViCareThermostatPlatform {
     this.log.debug('Refreshing authorization ...');
 
     try {
-      const response = await this.authorizedRequest(tokenUrl, 'get', {
+      const response = await this.authorizedRequest(tokenUrl, 'post', {
         body: params,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -409,6 +409,7 @@ class ViCareThermostatPlatform {
       }
     } catch (error) {
       this.log.error('Error retrieving smart components:', error);
+      throw error;
     }
   }
 
