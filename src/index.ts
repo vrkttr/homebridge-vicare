@@ -185,7 +185,7 @@ class ViCareThermostatPlatform {
             return reject(error || new Error(JSON.stringify(body, null, 2)));
           }
 
-          this.log.debug('Successfully refreshed authorization.');
+          this.log('Successfully refreshed authorization.');
 
           const tokenResponse: ViessmannAuthorization = JSON.parse(body);
           this.accessToken = tokenResponse.access_token;
