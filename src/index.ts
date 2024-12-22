@@ -3,6 +3,7 @@ import http from 'node:http';
 import request from 'request';
 import {internalIpV4} from 'internal-ip';
 import type {
+  CharacteristicGetCallback,
   API as HomebridgeAPI,
   Characteristic as HomebridgeCharacteristic,
   CharacteristicSetCallback as HomebridgeCharacteristicSetCallback,
@@ -65,6 +66,8 @@ class ViCareThermostatPlatform {
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
     this.server = null;
+
+    this.log.debug('Loaded config', config);
 
     this.api.on('didFinishLaunching', async () => {
       this.log('Starting authentication process...');
@@ -371,17 +374,17 @@ class ViCareThermostatAccessory {
     this.deviceId = config.deviceId;
     this.installationId = installationId;
     this.gatewaySerial = gatewaySerial;
-    this.type = config.type;
+    this.type = config.type || 'temperature_sensor';
 
     this.temperatureService =
-      this.type === 'temperature_sensor'
-        ? new Service.TemperatureSensor(
-            this.name,
-            `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
-          )
-        : new Service.Thermostat(
+      this.type === 'thermostat'
+        ? new Service.Thermostat(
             this.name,
             `thermostatService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
+          )
+        : new Service.TemperatureSensor(
+            this.name,
+            `temperatureService_${this.name}_${this.feature}_${UUIDGen.generate(this.name + this.feature)}`
           );
 
     this.temperatureService
@@ -409,7 +412,7 @@ class ViCareThermostatAccessory {
     return this.services;
   }
 
-  private getTemperature(callback: (err: Error | null, temp?: number | string) => void): void {
+  private getTemperature(callback: CharacteristicGetCallback): void {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
     this.log.debug(`Fetching temperature from ${url}`);
 
@@ -442,35 +445,33 @@ class ViCareThermostatAccessory {
     );
   }
 
-  private getBurnerStatus(): Promise<{isActive: boolean}> {
+  private getBurnerStatus(callback: CharacteristicGetCallback): void {
     const url = `${this.apiEndpoint}/features/installations/${this.installationId}/gateways/${this.gatewaySerial}/devices/${this.deviceId}/features/${this.feature}`;
     this.log.debug(`Fetching burner status from ${url}`);
 
-    return new Promise((resolve, reject) =>
-      request.get(
-        {
-          url: url,
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-          json: true,
+    request.get(
+      {
+        url: url,
+        headers: {
+          Authorization: `Bearer ${this.accessToken}`,
         },
-        (error, response, body) => {
-          if (!error && response.statusCode === 200) {
-            const data: ViessmannFeature<boolean> = body.data || body;
-            if (data.properties?.active?.value !== undefined) {
-              const isActive = data.properties.active.value;
-              resolve({isActive});
-            } else {
-              this.log.error('Unexpected response structure:', data);
-              reject(new Error('Unexpected response structure.'));
-            }
+        json: true,
+      },
+      (error, response, body) => {
+        if (!error && response.statusCode === 200) {
+          const data: ViessmannFeature<boolean> = body.data || body;
+          if (data.properties?.active?.value !== undefined) {
+            const isActive = data.properties.active.value;
+            callback(null, isActive);
           } else {
-            this.log.error('Error fetching burner status:', error || body);
-            reject(error || new Error(body));
+            this.log.error('Unexpected response structure:', data);
+            callback(new Error('Unexpected response structure.'));
           }
+        } else {
+          this.log.error('Error fetching burner status:', error || body);
+          callback(error || new Error(body));
         }
-      )
+      }
     );
   }
 
