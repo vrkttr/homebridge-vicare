@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.2...v2.5.0) (2024-12-22)
+
+
+### Features
+
+* Disable cooling for thermostat ([95aebcc](https://github.com/ffflorian/homebridge-vicare-2/commit/95aebccdd0f9bc773c557a7e17082c8e67c8f239))
+
 ## [2.4.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.4.1...v2.4.2) (2024-12-22)
 
 
