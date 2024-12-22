@@ -1,3 +1,10 @@
+# [2.4.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.3.0...v2.4.0) (2024-12-22)
+
+
+### Features
+
+* Add optional accessory type ([158b50e](https://github.com/ffflorian/homebridge-vicare-2/commit/158b50e168366e79c5d704271cdaa385ef604ff1))
+
 # [2.3.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.2.4...v2.3.0) (2024-12-22)
 
 
