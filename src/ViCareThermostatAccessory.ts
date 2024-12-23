@@ -109,9 +109,9 @@ export class ViCareThermostatAccessory {
       if (data.commands?.setTemperature?.params.targetTemperature?.constraints.min !== undefined) {
         const {min, max, stepping} = data.commands.setTemperature.params.targetTemperature.constraints;
         this.temperatureService.getCharacteristic(Characteristic.TargetTemperature).setProps({
-          minValue: min,
-          maxValue: this.maxTemp || max,
-          minStep: stepping,
+          minValue: Number(min),
+          maxValue: this.maxTemp || Number(max),
+          minStep: Number(stepping),
         });
       }
 
