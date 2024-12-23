@@ -121,11 +121,11 @@ The plugin will handle the OAuth2 authentication process automatically. Follow t
 
 **Solar**
 
-- ``solar.power.production.current`: Current solar power production
-- ``solar.power.production.daily`: Daily solar power production
-- ``solar.power.production.monthly`: Monthly solar power production
-- ``solar.sensors.temperature.collector`: Solar collector temperature
-- ``solar.sensors.temperature.dhw`: Solar DHW temperature
+- `solar.power.production.current`: Current solar power production
+- `solar.power.production.daily`: Daily solar power production
+- `solar.power.production.monthly`: Monthly solar power production
+- `solar.sensors.temperature.collector`: Solar collector temperature
+- `solar.sensors.temperature.dhw`: Solar DHW temperature
 
 **Heat Pump**
 
