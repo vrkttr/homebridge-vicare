@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.9.0...v2.9.1) (2024-12-23)
+
+
+### Bug Fixes
+
+* convert loaded temperature constraints to number ([b4075fb](https://github.com/ffflorian/homebridge-vicare-2/commit/b4075fb8b4682cb69c672fe8bcd1cf5bc5f53155))
+
 # [2.9.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.6...v2.9.0) (2024-12-23)
 
 
