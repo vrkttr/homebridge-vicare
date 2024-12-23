@@ -368,7 +368,7 @@ export class ViCareThermostatPlatform {
 
     if (!accessory) {
       accessory = new Accessory(deviceConfig.name!, uuid);
-      this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
+      this.api.registerPlatformAccessories('homebridge-vicare-2', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
       this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
     }
