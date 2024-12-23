@@ -21,7 +21,6 @@ export class RequestService {
     }
 
     try {
-      this.log.debug('authorizedRequest', {url, method, headers: config?.headers});
       return await this.request(url, method, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
@@ -35,24 +34,22 @@ export class RequestService {
   }
 
   public async checkForTokenExpiration(
-    error: ViessmannAPIError,
+    body: ViessmannAPIError,
     url: string,
     method: string = 'get',
     config?: RequestInit,
     retries: number = 1
   ): Promise<any> {
-    this.log.debug(JSON.stringify(error, null, 2));
-    if (error.error === 'EXPIRED TOKEN') {
+    if (body.error === 'EXPIRED TOKEN') {
       const {access_token} = await this.refreshAuth();
       this.accessToken = access_token;
       return await this.authorizedRequest(url, method, config, ++retries);
     } else {
-      throw error;
+      throw body;
     }
   }
 
   public async request(url: string, method: string, config?: RequestInit): Promise<any> {
-    this.log.debug('request', {url, method, headers: config?.headers});
     return await fetch(url, {
       headers: {
         Accept: 'application/json',
