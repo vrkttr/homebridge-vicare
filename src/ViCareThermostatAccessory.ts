@@ -47,9 +47,6 @@ export class ViCareThermostatAccessory {
 
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
-      .setProps({
-        minStep: 1,
-      })
       .on('get', this.getTemperature.bind(this));
 
     this.temperatureService.getCharacteristic(Characteristic.TargetTemperature).setProps({
@@ -84,6 +81,7 @@ export class ViCareThermostatAccessory {
     }
 
     this.services = [this.temperatureService];
+
     if (this.switchService) {
       this.services.push(this.switchService);
     }
@@ -107,6 +105,15 @@ export class ViCareThermostatAccessory {
       }
 
       const data = (body as ViessmannAPIResponse<ViessmannFeature<number>>).data || body;
+
+      if (data.commands?.setTemperature?.params.targetTemperature?.constraints.min !== undefined) {
+        const {min, max, stepping} = data.commands.setTemperature.params.targetTemperature.constraints;
+        this.temperatureService.getCharacteristic(Characteristic.TargetTemperature).setProps({
+          minValue: min,
+          maxValue: this.maxTemp || max,
+          minStep: stepping,
+        });
+      }
 
       if (data.properties?.value?.value !== undefined) {
         const temp = data.properties.value.value;

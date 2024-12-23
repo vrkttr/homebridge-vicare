@@ -51,12 +51,15 @@ export interface ViessmannGateway {
 }
 
 export interface ViessmannFeatureCommandParam {
-  type: string;
-  required: boolean;
   constraints: {
-    minLength: number;
-    maxLength: number;
+    max?: number;
+    maxLength?: number;
+    min?: number;
+    minLength?: number;
+    stepping?: number;
   };
+  required: boolean;
+  type: string;
 }
 
 export interface ViessmannFeatureCommand {
