@@ -1,3 +1,10 @@
+## [2.8.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.3...v2.8.4) (2024-12-23)
+
+
+### Bug Fixes
+
+* more request logging ([57d3d08](https://github.com/ffflorian/homebridge-vicare-2/commit/57d3d08b3f917701291f2d77cc14e84c45f864b9))
+
 ## [2.8.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.2...v2.8.3) (2024-12-23)
 
 
