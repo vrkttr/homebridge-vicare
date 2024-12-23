@@ -268,7 +268,7 @@ export class ViCareThermostatPlatform {
 
       this.log('Successfully retrieved installations.');
       this.log.debug(JSON.stringify(body, null, 2));
-      const installation = (body as ViessmannAPIResponse<ViessmannInstallation[]>).data[0];
+      const [installation] = (body as ViessmannAPIResponse<ViessmannInstallation[]>).data;
       installationId = installation.id;
     } catch (error) {
       this.log.error('Error retrieving installations:', error);
@@ -298,7 +298,7 @@ export class ViCareThermostatPlatform {
         throw new Error('No gateway data available.');
       }
 
-      const gateway = (body as ViessmannAPIResponse<ViessmannGateway[]>).data[0];
+      const [gateway] = (body as ViessmannAPIResponse<ViessmannGateway[]>).data;
       const gatewaySerial = gateway.serial;
       return {installationId, gatewaySerial};
     } catch (error) {
