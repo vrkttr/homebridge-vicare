@@ -82,32 +82,17 @@ class ViCareThermostatPlatform {
         this.localStorage = storage;
       }
 
-      if (this.localStorage?.refreshToken) {
-        this.log('Found refresh token in storage file 🙌');
-        this.requestService.refreshToken = this.localStorage.refreshToken;
-        await this.requestService.refreshAuth();
-      } else {
-        this.log('Starting authentication process...');
-        this.hostIp = config.hostIp || (await internalIpV4());
-        this.redirectUri = `http://${this.hostIp}:4200`;
-        this.log.debug(`Using redirect URI: ${this.redirectUri}`);
-
-        try {
-          const {access_token, refresh_token} = await this.authenticate();
-          this.requestService.accessToken = access_token;
-          this.requestService.refreshToken = refresh_token;
-          await this.saveLocalStorage({...this.localStorage, refreshToken: refresh_token});
-        } catch (error) {
-          this.log.error('Error during authentication:', error);
-          throw error;
-        }
-
-        if (this.requestService.accessToken) {
-          this.log('Authentication successful, received access token.');
+      try {
+        if (this.localStorage?.refreshToken) {
+          this.log('Found refresh token in storage file 🙌');
+          this.requestService.refreshToken = this.localStorage.refreshToken;
+          await this.requestService.refreshAuth();
         } else {
-          this.log.error('Authentication did not succeed, received no access token.');
-          return;
+          throw new Error('No token found');
         }
+      } catch(error) {
+        this.log.warn('Refresh token invalid:', error);
+        await this.startAuth();
       }
 
       try {
@@ -129,6 +114,30 @@ class ViCareThermostatPlatform {
 
       this.log('All set up! ✨');
     });
+  }
+  
+  private async startAuth() {
+    this.log('Starting authentication process...');
+    this.hostIp = config.hostIp || (await internalIpV4());
+    this.redirectUri = `http://${this.hostIp}:4200`;
+    this.log.debug(`Using redirect URI: ${this.redirectUri}`);
+
+    try {
+      const {access_token, refresh_token} = await this.authenticate();
+      this.requestService.accessToken = access_token;
+      this.requestService.refreshToken = refresh_token;
+      await this.saveLocalStorage({...this.localStorage, refreshToken: refresh_token});
+    } catch (error) {
+      this.log.error('Error during authentication:', error);
+      throw error;
+    }
+
+    if (this.requestService.accessToken) {
+      this.log('Authentication successful, received access token.');
+    } else {
+      this.log.error('Authentication did not succeed, received no access token.');
+      return;
+    }
   }
 
   public configureAccessory(accessory: HomebridgePlatformAccessory) {
