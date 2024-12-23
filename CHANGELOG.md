@@ -1,3 +1,10 @@
+## [2.8.6](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.5...v2.8.6) (2024-12-23)
+
+
+### Bug Fixes
+
+* Remove unused logs ([05432a5](https://github.com/ffflorian/homebridge-vicare-2/commit/05432a5b78a19441b1b0a8335984867d3f4a8e41))
+
 ## [2.8.5](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.4...v2.8.5) (2024-12-23)
 
 
