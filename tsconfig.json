@@ -14,7 +14,7 @@
     "noUnusedParameters": true,
     "outDir": "dist",
     "rootDir": "src",
-    "sourceMap": false,
+    "sourceMap": true,
     "strict": true,
     "strictFunctionTypes": true,
     "target": "ES6"
