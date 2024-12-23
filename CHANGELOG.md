@@ -1,3 +1,15 @@
+# [2.9.0](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.6...v2.9.0) (2024-12-23)
+
+
+### Bug Fixes
+
+* plugin name for accessories ([57b1709](https://github.com/ffflorian/homebridge-vicare-2/commit/57b1709b7d6fee450ecd81d497e0e8c7ff4f1851))
+
+
+### Features
+
+* Read minimum and maximum heating value from API ([5fa0f2d](https://github.com/ffflorian/homebridge-vicare-2/commit/5fa0f2dde900d3d49a97fb1928130f38b7719309))
+
 ## [2.8.6](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.5...v2.8.6) (2024-12-23)
 
 
