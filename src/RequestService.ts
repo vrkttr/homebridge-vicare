@@ -14,13 +14,14 @@ export class RequestService {
     url: string,
     method: string = 'get',
     config?: RequestInit,
-    triedTimes: number = 0
+    retries: number = 0
   ): Promise<any> {
-    if (triedTimes >= 3) {
+    if (retries >= 3) {
       throw new Error('Could not refresh authentication token.');
     }
 
     try {
+      this.log.debug('authorizedRequest', {url, method, headers: config?.headers});
       return await this.request(url, method, {
         headers: {
           Authorization: `Bearer ${this.accessToken}`,
@@ -33,13 +34,14 @@ export class RequestService {
       if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
         const {access_token} = await this.refreshAuth();
         this.accessToken = access_token;
-        return await this.authorizedRequest(url, method, config, ++triedTimes);
+        return await this.authorizedRequest(url, method, config, ++retries);
       }
       throw error;
     }
   }
 
   public async request(url: string, method: string, config?: RequestInit): Promise<any> {
+    this.log.debug('request', {url, method, headers: config?.headers});
     return await fetch(url, {
       headers: {
         Accept: 'application/json',
