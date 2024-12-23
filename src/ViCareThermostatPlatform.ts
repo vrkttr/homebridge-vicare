@@ -22,6 +22,7 @@ import type {
   ViessmannInstallation,
   ViessmannGateway,
   ViessmannSmartComponent,
+  ViessmannAPIError,
 } from './interfaces.js';
 import {RequestService} from './RequestService.js';
 
@@ -252,21 +253,22 @@ export class ViCareThermostatPlatform {
 
   private async retrieveIds(): Promise<{installationId: number; gatewaySerial: string}> {
     this.log.debug('Retrieving installation IDs...');
+    const url = `${this.apiEndpoint}/equipment/installations`;
 
     let installationId: number | undefined;
 
     try {
-      const response = await this.requestService.authorizedRequest(`${this.apiEndpoint}/equipment/installations`);
+      const response = await this.requestService.authorizedRequest(url);
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannInstallation[]>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannInstallation[]> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
       this.log('Successfully retrieved installations.');
       this.log.debug(JSON.stringify(body, null, 2));
-      const installation = body.data[0];
+      const installation = (body as ViessmannAPIResponse<ViessmannInstallation[]>).data[0];
       installationId = installation.id;
     } catch (error) {
       this.log.error('Error retrieving installations:', error);
@@ -279,21 +281,24 @@ export class ViCareThermostatPlatform {
       const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways`;
       const response = await this.requestService.authorizedRequest(url, 'get');
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannGateway[]>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannGateway[]> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
       this.log('Successfully retrieved gateways.');
       this.log.debug(JSON.stringify(body, null, 2));
 
-      if (!body.data || body.data.length === 0) {
+      if (
+        !(body as ViessmannAPIResponse<ViessmannGateway[]>).data ||
+        (body as ViessmannAPIResponse<ViessmannGateway[]>).data.length === 0
+      ) {
         this.log.error('No gateway data available.');
         throw new Error('No gateway data available.');
       }
 
-      const gateway = body.data[0];
+      const gateway = (body as ViessmannAPIResponse<ViessmannGateway[]>).data[0];
       const gatewaySerial = gateway.serial;
       return {installationId, gatewaySerial};
     } catch (error) {
@@ -309,16 +314,16 @@ export class ViCareThermostatPlatform {
     try {
       const response = await this.requestService.authorizedRequest(url, 'get');
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannSmartComponent[]>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannSmartComponent[]> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
       this.log.debug('Successfully retrieved smart components.');
       this.log.debug(JSON.stringify(body, null, 2));
 
-      for (const component of body.data) {
+      for (const component of (body as ViessmannAPIResponse<ViessmannSmartComponent[]>).data) {
         this.log.debug(
           `Component ID: ${component.id}, Name: ${component.name}, Selected: ${component.selected}, Deleted: ${component.deleted}`
         );
@@ -343,14 +348,14 @@ export class ViCareThermostatPlatform {
         },
       });
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannSmartComponent[]>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannSmartComponent[]> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
       this.log('Successfully selected smart components:', body);
-      return {result: body};
+      return {result: body as ViessmannAPIResponse<ViessmannSmartComponent[]>};
     } catch (error) {
       this.log.error('Error selecting smart components:', error);
       throw error;

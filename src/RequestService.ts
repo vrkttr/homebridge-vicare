@@ -30,12 +30,23 @@ export class RequestService {
         ...config,
       });
     } catch (error) {
-      this.log.debug(JSON.stringify(error, null, 2));
-      if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
-        const {access_token} = await this.refreshAuth();
-        this.accessToken = access_token;
-        return await this.authorizedRequest(url, method, config, ++retries);
-      }
+      return await this.checkForTokenExpiration(error as ViessmannAPIError, url, method, config, retries);
+    }
+  }
+
+  public async checkForTokenExpiration(
+    error: ViessmannAPIError,
+    url: string,
+    method: string = 'get',
+    config?: RequestInit,
+    retries: number = 1
+  ): Promise<any> {
+    this.log.debug(JSON.stringify(error, null, 2));
+    if (error.error === 'EXPIRED TOKEN') {
+      const {access_token} = await this.refreshAuth();
+      this.accessToken = access_token;
+      return await this.authorizedRequest(url, method, config, ++retries);
+    } else {
       throw error;
     }
   }

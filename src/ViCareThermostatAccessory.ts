@@ -7,7 +7,7 @@ import type {
 import type {Logging as HomebridgeLogging, PlatformConfig as HomebridgePlatformConfig} from 'homebridge';
 
 import {Service, UUIDGen, Characteristic} from './index.js';
-import type {LocalDevice, ViessmannAPIResponse, ViessmannFeature} from './interfaces.js';
+import type {LocalDevice, ViessmannAPIError, ViessmannAPIResponse, ViessmannFeature} from './interfaces.js';
 import {RequestService} from './RequestService.js';
 
 export class ViCareThermostatAccessory {
@@ -100,13 +100,13 @@ export class ViCareThermostatAccessory {
     try {
       const response = await this.requestService.authorizedRequest(url);
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<number>>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<number>> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
-      const data = body.data || body;
+      const data = (body as ViessmannAPIResponse<ViessmannFeature<number>>).data || body;
 
       if (data.properties?.value?.value !== undefined) {
         const temp = data.properties.value.value;
@@ -130,13 +130,13 @@ export class ViCareThermostatAccessory {
     try {
       const response = await this.requestService.authorizedRequest(url);
 
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<boolean>>;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<boolean>> | ViessmannAPIError;
 
       if (!response.ok) {
-        throw new Error(JSON.stringify(body, null, 2));
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
 
-      const data: ViessmannFeature<boolean> = body.data || body;
+      const data = (body as ViessmannAPIResponse<ViessmannFeature<boolean>>).data || body;
       if (data.properties?.active?.value !== undefined) {
         const isActive = data.properties.active.value;
         callback(null, isActive);
