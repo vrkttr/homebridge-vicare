@@ -29,6 +29,7 @@ export class RequestService {
         ...config,
       });
     } catch (error) {
+      this.log.debug(error);
       if ((error as ViessmannAPIError).error === 'EXPIRED TOKEN') {
         const {access_token} = await this.refreshAuth();
         this.accessToken = access_token;
