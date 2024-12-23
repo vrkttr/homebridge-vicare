@@ -1,3 +1,11 @@
+## [2.8.3](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.2...v2.8.3) (2024-12-23)
+
+
+### Bug Fixes
+
+* Log error as JSON ([52a50f9](https://github.com/ffflorian/homebridge-vicare-2/commit/52a50f9308e2e1cea3f9b83ee845e7aa25a56177))
+* Log error in RequestService ([7c2e3e1](https://github.com/ffflorian/homebridge-vicare-2/commit/7c2e3e1a48163bebb200622bf6b3b7ea1512ba02))
+
 ## [2.8.2](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.1...v2.8.2) (2024-12-22)
 
 
