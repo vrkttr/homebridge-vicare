@@ -1,3 +1,13 @@
+## [2.8.5](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.4...v2.8.5) (2024-12-23)
+
+
+### Bug Fixes
+
+* Add missing host IP parameter ([b3e2d9b](https://github.com/ffflorian/homebridge-vicare-2/commit/b3e2d9bf675615970097cdc13b8452a244cf7771))
+* check if token is expired ([b4e7ea7](https://github.com/ffflorian/homebridge-vicare-2/commit/b4e7ea7a73adee50b8798e9342e08a72761f0093))
+* plugin identifier ([d510fa7](https://github.com/ffflorian/homebridge-vicare-2/commit/d510fa773cf338cf71728833bb6adc4dd69f71dd))
+* Start authentication if refresh token is invalid ([2b359d9](https://github.com/ffflorian/homebridge-vicare-2/commit/2b359d9a0c0ae1b4c45cc7bac045bf77cc914936))
+
 ## [2.8.4](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.8.3...v2.8.4) (2024-12-23)
 
 
