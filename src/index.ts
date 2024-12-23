@@ -90,9 +90,9 @@ class ViCareThermostatPlatform {
         } else {
           throw new Error('No token found');
         }
-      } catch(error) {
+      } catch (error) {
         this.log.warn('Refresh token invalid:', error);
-        await this.startAuth();
+        await this.startAuth(config.hostIp);
       }
 
       try {
@@ -115,10 +115,10 @@ class ViCareThermostatPlatform {
       this.log('All set up! ✨');
     });
   }
-  
-  private async startAuth() {
+
+  private async startAuth(hostIp?: string) {
     this.log('Starting authentication process...');
-    this.hostIp = config.hostIp || (await internalIpV4());
+    this.hostIp = hostIp || (await internalIpV4());
     this.redirectUri = `http://${this.hostIp}:4200`;
     this.log.debug(`Using redirect URI: ${this.redirectUri}`);
 
