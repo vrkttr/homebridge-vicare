@@ -15,7 +15,7 @@
     "@types/node": "~22",
     "homebridge": "1.8.5",
     "prettier": "3.4.2",
-    "semantic-release": "24.2.0",
+    "semantic-release": "24.2.1",
     "typescript": "5.7.3"
   },
   "engines": {
