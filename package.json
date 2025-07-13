@@ -49,10 +49,10 @@
     "build": "tsc",
     "dist": "rm -rf dist && yarn build",
     "format": "yarn prettier --write",
-    "lint": "exit 0",
+    "lint": "yarn prettier --list-different",
     "release": "semantic-release",
     "prettier": "prettier '**/*.{ts,json,md,yml}'",
-    "test": "yarn prettier --list-different"
+    "test": "exit 0"
   },
   "type": "module",
   "version": "2.9.1"
