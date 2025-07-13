@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build_test_publish:
+    name: Build, test and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Set yarn cache directory
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+
+      - name: Get yarn cache
+        uses: actions/cache@v4
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Setup yarn
+        run: |
+          corepack prepare yarn@stable --activate
+          yarn set version classic
+
+      - name: Build, lint and test
+        run: |
+          yarn --frozen-lockfile
+          yarn lint
+          yarn build
+          yarn test
+
+      - name: Release on npm
+        if: |
+          github.event_name != 'pull_request' &&
+          !startsWith(github.event.head_commit.message, 'chore')
+        env:
+          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
+        run: yarn release

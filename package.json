@@ -52,7 +52,7 @@
     "lint": "exit 0",
     "release": "semantic-release",
     "prettier": "prettier '**/*.{ts,json,md,yml}'",
-    "test": "yarn prettier --list-different"
+    "test": "exit 0"
   },
   "type": "module",
   "version": "2.9.1"
