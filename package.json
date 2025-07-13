@@ -48,8 +48,8 @@
   "scripts": {
     "build": "tsc",
     "dist": "rm -rf dist && yarn build",
-    "format": "yarn prettier --write",
-    "lint": "exit 0",
+    "format": "yarn lint --write",
+    "lint": "yarn prettier",
     "release": "semantic-release",
     "prettier": "prettier '**/*.{ts,json,md,yml}'",
     "test": "exit 0"
