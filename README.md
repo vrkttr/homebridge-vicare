@@ -17,7 +17,7 @@ Enhance your smart home setup by seamlessly connecting your Viessmann ViCare sys
 
 To use this plugin, you will need to create an API key by following these steps:
 
-1. **Create an Account**: Sign up for an account on the [Viessmann Developer Portal](https://app.developer.viessmann.com/).
+1. **Create an Account**: Sign up for an account on the [Viessmann Developer Portal](https://app.developer.viessmann-climatesolutions.com/).
 
 2. **Create a new client:**
 
@@ -44,7 +44,7 @@ To use this plugin, you will need to create an API key by following these steps:
       platform: 'ViCareThermostatPlatform',
       name: 'ViCareThermostat',
       clientId: 'YOUR CLIENT ID',
-      apiEndpoint: 'https://api.viessmann.com/iot/v1',
+      apiEndpoint: 'https://api.viessmann-climatesolutions.com/iot/v1',
       hostIp: 'YOUR HOST IP', // optional, default is the detected IP address
       devices: [
         {

@@ -184,7 +184,7 @@ export class ViCareThermostatPlatform {
     params.set('code_challenge_method', 'S256');
     params.set('code_challenge', this.codeChallenge);
 
-    const authUrl = `https://iam.viessmann.com/idp/v3/authorize?${params.toString()}`;
+    const authUrl = `https://iam.viessmann-climatesolutions.com/idp/v3/authorize?${params.toString()}`;
 
     this.log(`Click this link for authentication: ${authUrl}`);
     return this.getCodeViaServer();
@@ -218,7 +218,7 @@ export class ViCareThermostatPlatform {
   }
 
   private async exchangeCodeForToken(authCode: string): Promise<ViessmannAuthorization> {
-    const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
+    const tokenUrl = 'https://iam.viessmann-climatesolutions.com/idp/v3/token';
 
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);

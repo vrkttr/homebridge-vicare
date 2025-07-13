@@ -61,7 +61,7 @@ export class RequestService {
   }
 
   public async refreshAuth(): Promise<ViessmannAuthorization> {
-    const tokenUrl = 'https://iam.viessmann.com/idp/v3/token';
+    const tokenUrl = 'https://iam.viessmann-climatesolutions.com/idp/v3/token';
 
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);
