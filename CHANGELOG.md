@@ -1,3 +1,16 @@
+# [2.10.0](https://github.com/vrkttr/homebridge-vicare/compare/v2.9.1...v2.10.0) (2025-07-14)
+
+
+### Bug Fixes
+
+* New API URL ([be17384](https://github.com/vrkttr/homebridge-vicare/commit/be17384440a520881c081434d4f308c969524836))
+* Repository URL and package name ([f54f4e3](https://github.com/vrkttr/homebridge-vicare/commit/f54f4e3df0d2cb4ec2e03f8a14bd3d7f490aa250))
+
+
+### Features
+
+* Enable automatic release workflow ([#28](https://github.com/vrkttr/homebridge-vicare/issues/28)) ([e284cfe](https://github.com/vrkttr/homebridge-vicare/commit/e284cfecb324707191bc1637542f030a83e60426))
+
 ## [2.9.1](https://github.com/ffflorian/homebridge-vicare-2/compare/v2.9.0...v2.9.1) (2024-12-23)
 
 
