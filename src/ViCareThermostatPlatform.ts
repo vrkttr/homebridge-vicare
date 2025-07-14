@@ -178,8 +178,8 @@ export class ViCareThermostatPlatform {
   private authenticate(): Promise<ViessmannAuthorization> {
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);
-    params.set('redirect_uri', encodeURIComponent(this.redirectUri!));
-    params.set('scope', encodeURIComponent('IoT User offline_access'));
+    params.set('redirect_uri', this.redirectUri!);
+    params.set('scope', 'IoT User offline_access');
     params.set('response_type', 'code');
     params.set('code_challenge_method', 'S256');
     params.set('code_challenge', this.codeChallenge);
