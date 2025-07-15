@@ -1,3 +1,10 @@
+## [2.10.6](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.5...v2.10.6) (2025-07-15)
+
+
+### Bug Fixes
+
+* Prevent duplicate services and remove obsolete services on accessory update ([d11e88b](https://github.com/vrkttr/homebridge-vicare/commit/d11e88be312a16fc0b90171eb2ec414b9ed08ccb))
+
 ## [2.10.5](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.4...v2.10.5) (2025-07-15)
 
 
