@@ -53,7 +53,7 @@ export class ViCareThermostatPlatform {
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();
     this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
-    this.localStoragePath = path.join(api.user.storagePath(), 'homebridge-vicare-2-settings.json');
+    this.localStoragePath = path.join(api.user.storagePath(), 'homebridge-vicare-settings.json');
     this.requestService = new RequestService(this.log, this.clientId);
 
     this.log.debug('Loaded config', config);
@@ -368,7 +368,7 @@ export class ViCareThermostatPlatform {
 
     if (!accessory) {
       accessory = new Accessory(deviceConfig.name!, uuid);
-      this.api.registerPlatformAccessories('homebridge-vicare-2', 'ViCareThermostatPlatform', [accessory]);
+      this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
       this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
     }
