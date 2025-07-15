@@ -379,20 +379,32 @@ export class ViCareThermostatPlatform {
       this.log.error('Device name is not set, skipping accessory creation.');
       return;
     }
+  
     if (!this.installationId || !this.gatewaySerial) {
       this.log.error('Installation ID or gateway serial is not set, cannot add accessory.');
       return;
     }
+  
     const uuid = UUIDGen.generate(deviceConfig.name);
     let accessory = this.accessories.find(acc => acc.UUID === uuid);
-
-    if (!accessory) {
+  
+    if (accessory) {
+      this.log.debug(`Accessory "${deviceConfig.name}" loaded from cache.`);
+    } else {
       accessory = new Accessory(deviceConfig.name, uuid);
       this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
-      this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
+      this.log.debug(`Registered new accessory: "${deviceConfig.name}".`);
     }
-
+  
+    accessory.context.deviceConfig = deviceConfig;
+  
+    accessory
+      .getService(Service.AccessoryInformation)
+      ?.setCharacteristic(Characteristic.Manufacturer, 'Viessmann')
+      .setCharacteristic(Characteristic.Model, 'ViCare')
+      .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
+  
     const vicareAccessory = new ViCareThermostatAccessory(
       this.log,
       this.requestService,
@@ -401,25 +413,23 @@ export class ViCareThermostatPlatform {
       this.gatewaySerial,
       deviceConfig
     );
-
-    accessory.context.deviceConfig = deviceConfig;
-    accessory
-      .getService(Service.AccessoryInformation)
-      ?.setCharacteristic(Characteristic.Manufacturer, 'Viessmann')
-      .setCharacteristic(Characteristic.Model, 'ViCare')
-      .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
-
-    for (const service of vicareAccessory.getServices()) {
-      if (!service.subtype) {
-        this.log.error(`Subtype not set, cannot add service for acessory "${deviceConfig.name}".`);
+  
+    for (const newService of vicareAccessory.getServices()) {
+      if (!newService.subtype) {
+        this.log.error(`Subtype not set, cannot add service for accessory "${deviceConfig.name}".`);
         continue;
       }
-      const serviceExists = accessory.getServiceById(service.UUID, service.subtype);
-      if (!serviceExists) {
-        accessory.addService(service);
+  
+      let existingService = accessory.getServiceById(newService.UUID, newService.subtype);
+  
+      if (existingService) {
+        this.log.debug(`Service already exists for accessory "${deviceConfig.name}": ${newService.displayName} (${newService.subtype})`);
+      } else {
+        this.log.debug(`Adding new service for accessory "${deviceConfig.name}": ${newService.displayName} (${newService.subtype})`);
+        accessory.addService(newService);
       }
     }
-
+  
     this.api.updatePlatformAccessories([accessory]);
   }
 }
