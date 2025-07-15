@@ -379,7 +379,6 @@ export class ViCareThermostatPlatform {
       this.log.error('Device name is not set, skipping accessory creation.');
       return;
     }
-
     if (!this.installationId || !this.gatewaySerial) {
       this.log.error('Installation ID or gateway serial is not set, cannot add accessory.');
       return;
@@ -388,13 +387,13 @@ export class ViCareThermostatPlatform {
     const uuid = UUIDGen.generate(deviceConfig.name);
     let accessory = this.accessories.find(acc => acc.UUID === uuid);
 
-    if (accessory) {
-      this.log.debug(`Accessory "${deviceConfig.name}" loaded from cache.`);
-    } else {
+    if (!accessory) {
       accessory = new Accessory(deviceConfig.name, uuid);
       this.api.registerPlatformAccessories('homebridge-vicare', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
-      this.log.debug(`Registered new accessory: "${deviceConfig.name}".`);
+      this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
+    } else {
+      this.log.debug(`Loaded existing accessory from cache: "${deviceConfig.name}"`);
     }
 
     accessory.context.deviceConfig = deviceConfig;
@@ -414,23 +413,36 @@ export class ViCareThermostatPlatform {
       deviceConfig
     );
 
-    for (const newService of vicareAccessory.getServices()) {
-      if (!newService.subtype) {
+    const newServices = vicareAccessory.getServices();
+
+    for (const oldService of accessory.services) {
+      if (oldService.UUID === Service.AccessoryInformation.UUID) {
+        continue;
+      }
+
+      const stillNeeded = newServices.some(s => s.UUID === oldService.UUID && s.subtype === oldService.subtype);
+
+      if (!stillNeeded) {
+        this.log.debug(
+          `Removing obsolete service from "${deviceConfig.name}": UUID=${oldService.UUID}, Subtype=${oldService.subtype}`
+        );
+        accessory.removeService(oldService);
+      }
+    }
+
+    for (const service of newServices) {
+      if (!service.subtype) {
         this.log.error(`Subtype not set, cannot add service for accessory "${deviceConfig.name}".`);
         continue;
       }
 
-      let existingService = accessory.getServiceById(newService.UUID, newService.subtype);
+      const existingService = accessory.getServiceById(service.UUID, service.subtype);
 
-      if (existingService) {
+      if (!existingService) {
         this.log.debug(
-          `Service already exists for accessory "${deviceConfig.name}": ${newService.displayName} (${newService.subtype})`
+          `Adding new service to "${deviceConfig.name}": UUID=${service.UUID}, Subtype=${service.subtype}`
         );
-      } else {
-        this.log.debug(
-          `Adding new service for accessory "${deviceConfig.name}": ${newService.displayName} (${newService.subtype})`
-        );
-        accessory.addService(newService);
+        accessory.addService(service);
       }
     }
 
