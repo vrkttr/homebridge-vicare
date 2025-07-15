@@ -1,3 +1,10 @@
+## [2.10.3](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.2...v2.10.3) (2025-07-15)
+
+
+### Bug Fixes
+
+* Remove trailing slash from API endpoint ([f34ccc4](https://github.com/vrkttr/homebridge-vicare/commit/f34ccc4c104114999f7e7dc7b61fe9262a7a822d))
+
 ## [2.10.2](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.1...v2.10.2) (2025-07-15)
 
 
