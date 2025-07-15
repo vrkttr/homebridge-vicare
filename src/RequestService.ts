@@ -61,12 +61,16 @@ export class RequestService {
   }
 
   public async refreshAuth(): Promise<ViessmannAuthorization> {
+    if (!this.refreshToken) {
+      throw new Error('Refresh token is not set. Please authenticate first.');
+    }
+
     const tokenUrl = 'https://iam.viessmann-climatesolutions.com/idp/v3/token';
 
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);
     params.set('grant_type', 'refresh_token');
-    params.set('refresh_token', this.refreshToken!);
+    params.set('refresh_token', this.refreshToken);
 
     this.log.debug('Refreshing authorization ...');
 
