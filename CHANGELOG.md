@@ -1,3 +1,11 @@
+## [2.10.5](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.4...v2.10.5) (2025-07-15)
+
+
+### Bug Fixes
+
+* cached hb service id ([9c97900](https://github.com/vrkttr/homebridge-vicare/commit/9c9790017ba85940b5e6062043cd425c562ba47c))
+* removed uuid gen for accessorys ([4525b4a](https://github.com/vrkttr/homebridge-vicare/commit/4525b4a4331d4e04bcf938aade276c9242e4debe))
+
 ## [2.10.4](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.3...v2.10.4) (2025-07-15)
 
 
