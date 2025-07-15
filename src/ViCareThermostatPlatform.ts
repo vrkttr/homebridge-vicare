@@ -410,10 +410,7 @@ export class ViCareThermostatPlatform {
       .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
 
     for (const service of vicareAccessory.getServices()) {
-      if (!service.subtype) {
-        this.log.error(`Subtype not set, cannot add service for acessory "${deviceConfig.name}".`);
-        continue;
-      }
+      service.subtype = `${service.name}_${deviceConfig.deviceId}_${deviceConfig.feature}`;
       const serviceExists = accessory.getServiceById(service.UUID, service.subtype);
       if (!serviceExists) {
         accessory.addService(service);
