@@ -1,3 +1,10 @@
+## [2.10.1](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.0...v2.10.1) (2025-07-15)
+
+
+### Bug Fixes
+
+* Force publishing ([56fa39d](https://github.com/vrkttr/homebridge-vicare/commit/56fa39da3a5916e71b4722a7ea6237cb67467f83))
+
 # [2.10.0](https://github.com/vrkttr/homebridge-vicare/compare/v2.9.1...v2.10.0) (2025-07-14)
 
 
