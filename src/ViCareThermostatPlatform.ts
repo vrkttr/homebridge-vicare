@@ -176,9 +176,12 @@ export class ViCareThermostatPlatform {
   }
 
   private authenticate(): Promise<ViessmannAuthorization> {
+    if (!this.redirectUri) {
+      throw new Error('Redirect URI is not set. Please call startAuth() first.');
+    }
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);
-    params.set('redirect_uri', this.redirectUri!);
+    params.set('redirect_uri', this.redirectUri);
     params.set('scope', 'IoT User offline_access');
     params.set('response_type', 'code');
     params.set('code_challenge_method', 'S256');
@@ -194,7 +197,13 @@ export class ViCareThermostatPlatform {
     return new Promise((resolve, reject) => {
       this.server = http
         .createServer((req, res) => {
-          const url = new URL(req.url!, `http://${req.headers.host}`);
+          if (!req.url || !req.headers.host) {
+            this.log.error('Invalid request received, missing URL or host header.');
+            res.writeHead(400, {'Content-Type': 'text/plain'});
+            res.end('Invalid request.');
+            return;
+          }
+          const url = new URL(req.url, `http://${req.headers.host}`);
           const authCode = url.searchParams.get('code');
           if (authCode) {
             this.log.debug('Received authorization code:', authCode);
@@ -202,7 +211,7 @@ export class ViCareThermostatPlatform {
             res.end('Authorization successful. You can close this window.');
             this.exchangeCodeForToken(authCode)
               .then(auth => {
-                this.server!.close();
+                this.server?.close();
                 resolve(auth);
               })
               .catch(reject);
@@ -218,11 +227,14 @@ export class ViCareThermostatPlatform {
   }
 
   private async exchangeCodeForToken(authCode: string): Promise<ViessmannAuthorization> {
+    if (!this.redirectUri) {
+      throw new Error('Redirect URI is not set. Please call startAuth() first.');
+    }
     const tokenUrl = 'https://iam.viessmann-climatesolutions.com/idp/v3/token';
 
     const params = new URLSearchParams();
     params.set('client_id', this.clientId);
-    params.set('redirect_uri', this.redirectUri!);
+    params.set('redirect_uri', this.redirectUri);
     params.set('grant_type', 'authorization_code');
     params.set('code_verifier', this.codeVerifier);
     params.set('code', authCode);
@@ -363,11 +375,19 @@ export class ViCareThermostatPlatform {
   }
 
   private addAccessory(deviceConfig: HomebridgePlatformConfig & LocalDevice): void {
-    const uuid = UUIDGen.generate(deviceConfig.name!);
+    if (!deviceConfig.name) {
+      this.log.error('Device name is not set, skipping accessory creation.');
+      return;
+    }
+    if (!this.installationId || !this.gatewaySerial) {
+      this.log.error('Installation ID or gateway serial is not set, cannot add accessory.');
+      return;
+    }
+    const uuid = UUIDGen.generate(deviceConfig.name);
     let accessory = this.accessories.find(acc => acc.UUID === uuid);
 
     if (!accessory) {
-      accessory = new Accessory(deviceConfig.name!, uuid);
+      accessory = new Accessory(deviceConfig.name, uuid);
       this.api.registerPlatformAccessories('homebridge-vicare-2', 'ViCareThermostatPlatform', [accessory]);
       this.accessories.push(accessory);
       this.log.debug(`Added new accessory: "${deviceConfig.name}"`);
@@ -377,8 +397,8 @@ export class ViCareThermostatPlatform {
       this.log,
       this.requestService,
       this.apiEndpoint,
-      this.installationId!.toString(),
-      this.gatewaySerial!,
+      this.installationId.toString(),
+      this.gatewaySerial,
       deviceConfig
     );
 
@@ -390,7 +410,11 @@ export class ViCareThermostatPlatform {
       .setCharacteristic(Characteristic.SerialNumber, 'Default-Serial');
 
     for (const service of vicareAccessory.getServices()) {
-      const serviceExists = accessory.getServiceById(service.UUID, service.subtype!);
+      if (!service.subtype) {
+        this.log.error(`Subtype not set, cannot add service for acessory "${deviceConfig.name}".`);
+        continue;
+      }
+      const serviceExists = accessory.getServiceById(service.UUID, service.subtype);
       if (!serviceExists) {
         accessory.addService(service);
       }
