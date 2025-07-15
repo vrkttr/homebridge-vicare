@@ -33,6 +33,7 @@ export class ViCareThermostatAccessory {
     this.deviceId = config.deviceId;
     this.maxTemp = config.maxTemp;
     this.type = config.type || 'temperature_sensor';
+    this.apiEndpoint = apiEndpoint.replace(/\/$/, '');
 
     this.temperatureService =
       this.type === 'thermostat'
