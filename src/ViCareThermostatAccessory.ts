@@ -37,14 +37,8 @@ export class ViCareThermostatAccessory {
 
     this.temperatureService =
       this.type === 'thermostat'
-        ? new Service.Thermostat(
-            this.name,
-            `thermostatService_${this.name}_${this.feature}`
-          )
-        : new Service.TemperatureSensor(
-            this.name,
-            `temperatureService_${this.name}_${this.feature}`
-          );
+        ? new Service.Thermostat(this.name, `thermostatService_${this.name}_${this.feature}`)
+        : new Service.TemperatureSensor(this.name, `temperatureService_${this.name}_${this.feature}`);
 
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
@@ -71,10 +65,7 @@ export class ViCareThermostatAccessory {
     });
 
     if (config.feature.includes('burners')) {
-      this.switchService = new Service.Switch(
-        this.name,
-        `switchService_${this.name}_${this.feature}`
-      );
+      this.switchService = new Service.Switch(this.name, `switchService_${this.name}_${this.feature}`);
       this.switchService
         .getCharacteristic(Characteristic.On)
         .on('get', this.getBurnerStatus.bind(this))
