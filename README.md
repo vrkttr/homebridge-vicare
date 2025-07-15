@@ -1,8 +1,8 @@
 # Homebridge ViCare Plugin
 
-The Homebridge ViCare Plugin allows you to integrate your Viessmann ViCare heating system with Homebridge, enabling control and monitoring through Apple's HomeKit. This plugin provides real-time temperature readings, control over target temperatures, and access to various sensors and states of your heating system.
+The Homebridge ViCare Plugin allows you to integrate your Viessmann ViCare heating system with [Homebridge](https://homebridge.io), enabling control and monitoring through Apple's HomeKit. This plugin provides real-time temperature readings, control over target temperatures, and access to various sensors and states of your heating system.
 
-This version was written by [@ffflorian](https://github.com/ffflorian), thank you very much!
+This is a joint project by [@vrkttr](https://github.com/vrkttr) and [@ffflorian](https://github.com/ffflorian) 🚀
 
 ## Features
 
@@ -35,32 +35,32 @@ To use this plugin, you will need to create an API key by following these steps:
 
 ## Config
 
-```json5
+```json
 {
-  platforms: [
+  "platforms": [
     {
-      platform: 'ViCareThermostatPlatform',
-      name: 'ViCareThermostat',
-      clientId: 'YOUR CLIENT ID',
-      apiEndpoint: 'https://api.viessmann-climatesolutions.com/iot/v1',
-      hostIp: 'YOUR HOST IP', // optional, default is the detected IP address
-      devices: [
+      "platform": "ViCareThermostatPlatform",
+      "name": "ViCareThermostat",
+      "clientId": "YOUR CLIENT ID",
+      "apiEndpoint": "https://api.viessmann-climatesolutions.com/iot/v1",
+      "hostIp": "YOUR HOST IP", // optional, default is the detected IP address
+      "devices": [
         {
-          name: 'Supply temperature',
-          feature: 'heating.circuits.0.sensors.temperature.supply',
-          deviceId: '0',
-          type: 'temperature_sensor', // optional
+          "name": "Supply temperature",
+          "feature": "heating.circuits.0.sensors.temperature.supply",
+          "deviceId": "0",
+          "type": "temperature_sensor" // optional
         },
         {
-          name: 'Main DHW temperature',
-          feature: 'heating.dhw.temperature.main',
-          deviceId: '0',
-          maxTemp: 38, // optional
-          type: 'thermostat', // optional, default is "temperature_sensor"
-        },
-      ],
-    },
-  ],
+          "name": "Main DHW temperature",
+          "feature": "heating.dhw.temperature.main",
+          "deviceId": "0",
+          "maxTemp": 38, // optional
+          "type": "thermostat" // optional, default is "temperature_sensor"
+        }
+      ]
+    }
+  ]
 }
 ```
 
