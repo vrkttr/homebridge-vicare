@@ -1,3 +1,10 @@
+## [2.10.2](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.1...v2.10.2) (2025-07-15)
+
+
+### Bug Fixes
+
+* Remove assumed existence of variables ([#32](https://github.com/vrkttr/homebridge-vicare/issues/32)) ([08e4b02](https://github.com/vrkttr/homebridge-vicare/commit/08e4b02dcea29471b527bddc1b7692c646132ac1))
+
 ## [2.10.1](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.0...v2.10.1) (2025-07-15)
 
 
