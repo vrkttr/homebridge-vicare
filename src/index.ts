@@ -18,5 +18,5 @@ export default (homebridge: HomebridgeAPI) => {
   Characteristic = homebridge.hap.Characteristic;
   Accessory = homebridge.platformAccessory;
   UUIDGen = homebridge.hap.uuid;
-  homebridge.registerPlatform('homebridge-vicare-2', 'ViCareThermostatPlatform', ViCareThermostatPlatform);
+  homebridge.registerPlatform('homebridge-vicare', 'ViCareThermostatPlatform', ViCareThermostatPlatform);
 };
