@@ -1,3 +1,10 @@
+## [2.10.4](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.3...v2.10.4) (2025-07-15)
+
+
+### Bug Fixes
+
+* Rename platform from homebridge-vicare-2 to homebridge-vicare ([45efe00](https://github.com/vrkttr/homebridge-vicare/commit/45efe00ea8c41da3563e9744e3cf148301001c7a))
+
 ## [2.10.3](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.2...v2.10.3) (2025-07-15)
 
 
