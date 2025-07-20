@@ -36,9 +36,7 @@ export class ViCareThermostatPlatform {
   private readonly localStoragePath: string;
   private requestService: RequestService;
   private localStorage?: LocalStorage;
-  private gatewaySerial?: string;
   private hostIp?: string;
-  private installationId?: number;
   private redirectUri?: string;
   private server?: http.Server;
 
@@ -83,16 +81,19 @@ export class ViCareThermostatPlatform {
         this.log('Retrieved installation and gateway IDs.');
 
         // Group devices by deviceId
-        const devicesById = this.devices.reduce((acc, device) => {
-          if (!acc[device.deviceId]) {
-            acc[device.deviceId] = [];
-          }
-          acc[device.deviceId].push(device);
-          return acc;
-        }, {} as Record<string, typeof this.devices>);
+        const devicesById = this.devices.reduce(
+          (acc, device) => {
+            if (!acc[device.deviceId]) {
+              acc[device.deviceId] = [];
+            }
+            acc[device.deviceId].push(device);
+            return acc;
+          },
+          {} as Record<string, typeof this.devices>
+        );
 
         for (const gatewaySerial of gatewaySerials) {
-        // For each deviceId, fetch available features once
+          // For each deviceId, fetch available features once
           for (const deviceId of Object.keys(devicesById)) {
             const availableFeatures = await this.getAvailableFeatures(installationId, gatewaySerial, deviceId);
 
@@ -329,7 +330,7 @@ export class ViCareThermostatPlatform {
       }
 
       const gatewaySerials = gateways.map(g => g.serial);
-      return { installationId, gatewaySerials };
+      return {installationId, gatewaySerials};
     } catch (error) {
       this.log.error('Error retrieving gateways:', error);
       throw error;
@@ -345,10 +346,10 @@ export class ViCareThermostatPlatform {
     const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways/${gatewaySerial}/devices/${deviceId}/features`;
 
     try {
-      const response = await this.requestService.authorizedRequest(url,  'get');
+      const response = await this.requestService.authorizedRequest(url, 'get');
 
       const body = (await response.json()) as ViessmannAPIResponse<any[]> | ViessmannAPIError;
-    
+
       if (!response.ok) {
         return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
       }
@@ -361,7 +362,7 @@ export class ViCareThermostatPlatform {
         this.log.warn(`No features found for gateway ${gatewaySerial}, device ${deviceId}`);
         return [];
       }
-    
+
       return features.map(feature => feature.feature);
     } catch (error) {
       this.log.error('Error retrieving features:', error);
