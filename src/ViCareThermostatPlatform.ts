@@ -344,7 +344,7 @@ export class ViCareThermostatPlatform {
     deviceId: string
   ): Promise<string[]> {
     this.log.debug('Retrieving device features...');
-    const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways/${gatewaySerial}/devices/${deviceId}/features`;
+    const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways/${gatewaySerial}/devices/${deviceId}/features?skipDisabled`;
 
     try {
       const response = await this.requestService.authorizedRequest(url, 'get');
@@ -360,7 +360,7 @@ export class ViCareThermostatPlatform {
 
       const features = (body as ViessmannAPIResponse<ViessmannFeature<number>[]>).data;
       if (!features || features.length === 0) {
-        this.log.warn(`No features found for gateway ${gatewaySerial}, device ${deviceId}`);
+        this.log.warn(`No enabled features found for gateway ${gatewaySerial}, device ${deviceId}`);
         return [];
       }
 
