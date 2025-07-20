@@ -20,6 +20,7 @@ import type {
   ViessmannAuthorization,
   ViessmannAPIResponse,
   ViessmannInstallation,
+  ViessmannFeature,
   ViessmannGateway,
   ViessmannSmartComponent,
   ViessmannAPIError,
@@ -348,7 +349,7 @@ export class ViCareThermostatPlatform {
     try {
       const response = await this.requestService.authorizedRequest(url, 'get');
 
-      const body = (await response.json()) as ViessmannAPIResponse<any[]> | ViessmannAPIError;
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<number>[]> | ViessmannAPIError;
 
       if (!response.ok) {
         return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
@@ -357,7 +358,7 @@ export class ViCareThermostatPlatform {
       this.log('Successfully retrieved features.');
       this.log.debug(JSON.stringify(body, null, 2));
 
-      const features = (body as ViessmannAPIResponse<any[]>).data;
+      const features = (body as ViessmannAPIResponse<ViessmannFeature<number>[]>).data;
       if (!features || features.length === 0) {
         this.log.warn(`No features found for gateway ${gatewaySerial}, device ${deviceId}`);
         return [];
