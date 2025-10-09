@@ -1965,10 +1965,10 @@ init-package-json@^7.0.2:
     validate-npm-package-license "^3.0.4"
     validate-npm-package-name "^6.0.0"
 
-internal-ip@^8.0.0:
-  version "8.0.0"
-  resolved "https://registry.npmjs.org/internal-ip/-/internal-ip-8.0.0.tgz#9c998de890def7571d81e4366179e89c63d197fe"
-  integrity sha512-e6c3zxr9COnnc29PIz9LffmALOt0XhIJdR7f83DyHcQksL3B40KGmU3Sr1lrHja3i7Zyqo+AbwKZ+nZiMvg/OA==
+internal-ip@^8.0.1:
+  version "8.0.1"
+  resolved "https://registry.yarnpkg.com/internal-ip/-/internal-ip-8.0.1.tgz#703ed4cd94153c3152826fa810dc53cea2eeda0b"
+  integrity sha512-UBBMBk8f1PrIHUXOPI/6vW0eFWhZl/UGHpNaqLAAOANNZxkGuqq/IDfk2goQ902E9hy1mtM7iXhdgZCpCceeew==
   dependencies:
     cidr-tools "^6.4.1"
     default-gateway "^7.2.2"
