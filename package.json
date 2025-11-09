@@ -13,7 +13,7 @@
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "@types/node": "~22",
-    "homebridge": "1.11.0",
+    "homebridge": "1.11.1",
     "prettier": "3.6.2",
     "semantic-release": "25.0.1",
     "typescript": "5.9.3"
