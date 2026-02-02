@@ -7,7 +7,7 @@
   },
   "description": "Homebridge plugin for Viessmann ViCare",
   "devDependencies": {
-    "@evilmartians/lefthook": "2.0.13",
+    "@evilmartians/lefthook": "2.0.16",
     "@ffflorian/prettier-config": "0.3.3",
     "@ffflorian/semantic-release-config": "0.9.4",
     "@semantic-release/changelog": "6.0.3",
