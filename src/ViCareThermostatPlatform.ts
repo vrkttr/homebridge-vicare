@@ -20,6 +20,7 @@ import type {
   ViessmannAuthorization,
   ViessmannAPIResponse,
   ViessmannInstallation,
+  ViessmannFeature,
   ViessmannGateway,
   ViessmannSmartComponent,
   ViessmannAPIError,
@@ -36,9 +37,7 @@ export class ViCareThermostatPlatform {
   private readonly localStoragePath: string;
   private requestService: RequestService;
   private localStorage?: LocalStorage;
-  private gatewaySerial?: string;
   private hostIp?: string;
-  private installationId?: number;
   private redirectUri?: string;
   private server?: http.Server;
 
@@ -79,17 +78,39 @@ export class ViCareThermostatPlatform {
       }
 
       try {
-        const {installationId, gatewaySerial} = await this.retrieveIds();
+        const {installationId, gatewaySerials} = await this.retrieveIds();
         this.log('Retrieved installation and gateway IDs.');
 
-        this.installationId = installationId;
-        this.gatewaySerial = gatewaySerial;
+        // Group devices by deviceId
+        const devicesById = this.devices.reduce(
+          (acc, device) => {
+            if (!acc[device.deviceId]) {
+              acc[device.deviceId] = [];
+            }
+            acc[device.deviceId].push(device);
+            return acc;
+          },
+          {} as Record<string, typeof this.devices>
+        );
 
-        for (const deviceConfig of this.devices) {
-          this.addAccessory(deviceConfig);
+        for (const gatewaySerial of gatewaySerials) {
+          // For each deviceId, fetch available features once
+          for (const deviceId of Object.keys(devicesById)) {
+            const availableFeatures = await this.getAvailableFeatures(installationId, gatewaySerial, deviceId);
+
+            // Add only supported features
+            for (const deviceConfig of devicesById[deviceId]) {
+              if (availableFeatures.includes(deviceConfig.feature)) {
+                this.log.debug(`Adding accessory for feature ${deviceConfig.feature} on gateway ${gatewaySerial}`);
+                this.addAccessory(deviceConfig, installationId, gatewaySerial);
+              } else {
+                this.log.debug(`Skipping feature ${deviceConfig.feature} - not available on gateway ${gatewaySerial}`);
+              }
+            }
+          }
         }
 
-        await this.retrieveSmartComponents();
+        await this.retrieveSmartComponents(installationId);
       } catch (error) {
         this.log.error('Error retrieving installation or gateway IDs:', error);
         throw error;
@@ -263,7 +284,7 @@ export class ViCareThermostatPlatform {
     }
   }
 
-  private async retrieveIds(): Promise<{installationId: number; gatewaySerial: string}> {
+  private async retrieveIds(): Promise<{installationId: number; gatewaySerials: string[]}> {
     this.log.debug('Retrieving installation IDs...');
     const url = `${this.apiEndpoint}/equipment/installations`;
 
@@ -302,26 +323,57 @@ export class ViCareThermostatPlatform {
       this.log('Successfully retrieved gateways.');
       this.log.debug(JSON.stringify(body, null, 2));
 
-      if (
-        !(body as ViessmannAPIResponse<ViessmannGateway[]>).data ||
-        (body as ViessmannAPIResponse<ViessmannGateway[]>).data.length === 0
-      ) {
+      const gateways = (body as ViessmannAPIResponse<ViessmannGateway[]>).data;
+
+      if (!gateways || gateways.length === 0) {
         this.log.error('No gateway data available.');
         throw new Error('No gateway data available.');
       }
 
-      const [gateway] = (body as ViessmannAPIResponse<ViessmannGateway[]>).data;
-      const gatewaySerial = gateway.serial;
-      return {installationId, gatewaySerial};
+      const gatewaySerials = gateways.map(g => g.serial);
+      return {installationId, gatewaySerials};
     } catch (error) {
       this.log.error('Error retrieving gateways:', error);
       throw error;
     }
   }
 
-  private async retrieveSmartComponents(): Promise<void> {
+  private async getAvailableFeatures(
+    installationId: number,
+    gatewaySerial: string,
+    deviceId: string
+  ): Promise<string[]> {
+    this.log.debug('Retrieving device features...');
+    const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways/${gatewaySerial}/devices/${deviceId}/features?skipDisabled`;
+
+    try {
+      const response = await this.requestService.authorizedRequest(url, 'get');
+
+      const body = (await response.json()) as ViessmannAPIResponse<ViessmannFeature<number>[]> | ViessmannAPIError;
+
+      if (!response.ok) {
+        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
+      }
+
+      this.log('Successfully retrieved features.');
+      this.log.debug(JSON.stringify(body, null, 2));
+
+      const features = (body as ViessmannAPIResponse<ViessmannFeature<number>[]>).data;
+      if (!features || features.length === 0) {
+        this.log.warn(`No enabled features found for gateway ${gatewaySerial}, device ${deviceId}`);
+        return [];
+      }
+
+      return features.map(feature => feature.feature);
+    } catch (error) {
+      this.log.error('Error retrieving features:', error);
+      throw error;
+    }
+  }
+
+  private async retrieveSmartComponents(installationId: number): Promise<void> {
     this.log.debug('Retrieving smart components...');
-    const url = `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`;
+    const url = `${this.apiEndpoint}/equipment/installations/${installationId}/smartComponents`;
 
     try {
       const response = await this.requestService.authorizedRequest(url, 'get');
@@ -347,10 +399,11 @@ export class ViCareThermostatPlatform {
   }
 
   private async selectSmartComponents(
+    installationId: number,
     componentIds: string[]
   ): Promise<{result: ViessmannAPIResponse<ViessmannSmartComponent[]>}> {
     this.log.debug('Selecting smart components...');
-    const url = `${this.apiEndpoint}/equipment/installations/${this.installationId}/smartComponents`;
+    const url = `${this.apiEndpoint}/equipment/installations/${installationId}/smartComponents`;
 
     try {
       const response = await this.requestService.authorizedRequest(url, 'put', {
@@ -374,12 +427,16 @@ export class ViCareThermostatPlatform {
     }
   }
 
-  private addAccessory(deviceConfig: HomebridgePlatformConfig & LocalDevice): void {
+  private addAccessory(
+    deviceConfig: HomebridgePlatformConfig & LocalDevice,
+    installationId: number,
+    gatewaySerial: string
+  ): void {
     if (!deviceConfig.name) {
       this.log.error('Device name is not set, skipping accessory creation.');
       return;
     }
-    if (!this.installationId || !this.gatewaySerial) {
+    if (!installationId || !gatewaySerial) {
       this.log.error('Installation ID or gateway serial is not set, cannot add accessory.');
       return;
     }
@@ -408,8 +465,8 @@ export class ViCareThermostatPlatform {
       this.log,
       this.requestService,
       this.apiEndpoint,
-      this.installationId.toString(),
-      this.gatewaySerial,
+      installationId.toString(),
+      gatewaySerial,
       deviceConfig
     );
 
