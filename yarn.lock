@@ -63,10 +63,10 @@
   resolved "https://registry.npmjs.org/@colors/colors/-/colors-1.5.0.tgz#bb504579c1cae923e6576a4f5da43d25f97bdbd9"
   integrity sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==
 
-"@evilmartians/lefthook@2.0.16":
-  version "2.0.16"
-  resolved "https://registry.yarnpkg.com/@evilmartians/lefthook/-/lefthook-2.0.16.tgz#7ee3195418ff5ee8dbdd3664d0e8f7031f6c9126"
-  integrity sha512-TsLvg2Sq/Cm1wgLDMQuAZHPLz82WxVvHvFzv3+deSxXft8/JxMy5IBsuIbDBsLK9ZlrTbaAtBBQU5tbFQoRS0w==
+"@evilmartians/lefthook@2.1.1":
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/@evilmartians/lefthook/-/lefthook-2.1.1.tgz#1f49c75fa27529cc17bd5872f665edbbf2ae70bf"
+  integrity sha512-+nyEG9SCmI8wRhMbMr1GUFWfbIGeY/vlzenrMZgYWRVhEKOn/pQt4nQSQlQmaoxo4uOY13Vl53SaijFoE58bYg==
 
 "@fastify/busboy@^2.0.0":
   version "2.1.1"
