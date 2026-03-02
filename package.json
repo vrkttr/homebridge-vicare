@@ -3,7 +3,7 @@
     "name": "Florian Imdahl <github@ffflorian.dev>, @vrkttr"
   },
   "dependencies": {
-    "internal-ip": "^8.0.1"
+    "internal-ip": "^9.0.0"
   },
   "description": "Homebridge plugin for Viessmann ViCare",
   "devDependencies": {
