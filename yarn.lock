@@ -73,10 +73,10 @@
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.1.1.tgz#b9da6a878a371829a0502c9b6c1c143ef6663f4d"
   integrity sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==
 
-"@ffflorian/prettier-config@0.6.3":
-  version "0.6.3"
-  resolved "https://registry.yarnpkg.com/@ffflorian/prettier-config/-/prettier-config-0.6.3.tgz#158e13c24bb9268a416d26e37b34a983d4471a03"
-  integrity sha512-6/DszzYkQmRGeIJgz2XNyTtHcwaB1Ho2fQUaEZhMhVGMGYRl4WalX/DLw/593R0DWhllHsyXenYIlzQftofQNQ==
+"@ffflorian/prettier-config@0.8.2":
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/@ffflorian/prettier-config/-/prettier-config-0.8.2.tgz#5f67d9f20adb14fc20c5f6d30050e4dd520bb8e6"
+  integrity sha512-3RwBaYIa2sGOv2tIiIsfYwtzL2QWM7ISXF3RiMwvI2jxfnU0D3nCOtT8A5S9hIlF5RkUjlBMEkVDQnYSJDUa8A==
 
 "@ffflorian/semantic-release-config@0.12.4":
   version "0.12.4"
