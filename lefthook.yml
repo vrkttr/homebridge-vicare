@@ -3,4 +3,4 @@ pre-commit:
   commands:
     prettier:
       glob: '*.{ts,json,md,yml}'
-      run: npx --no-install prettier --write {staged_files} && git add {staged_files}
+      run: npx --no prettier --write {staged_files} && git add {staged_files}
