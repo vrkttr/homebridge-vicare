@@ -54,9 +54,7 @@ describe('retrieveIds (v2 API)', () => {
 
     await retrieveIds(API_ENDPOINT, mockRequest);
 
-    expect(mockRequest).toHaveBeenCalledWith(
-      `${API_ENDPOINT}/equipment/installations?includeGateways=true`
-    );
+    expect(mockRequest).toHaveBeenCalledWith(`${API_ENDPOINT}/equipment/installations?includeGateways=true`);
   });
 
   it('returns installationId and gatewaySerial from a v2 response', async () => {

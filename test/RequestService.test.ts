@@ -85,10 +85,7 @@ describe('RequestService', () => {
 
       await service.request('https://example.com', 'get');
 
-      expect(fetchMock).toHaveBeenCalledWith(
-        'https://example.com',
-        expect.objectContaining({method: 'get'})
-      );
+      expect(fetchMock).toHaveBeenCalledWith('https://example.com', expect.objectContaining({method: 'get'}));
     });
   });
 
@@ -116,4 +113,3 @@ describe('RequestService', () => {
     });
   });
 });
-
