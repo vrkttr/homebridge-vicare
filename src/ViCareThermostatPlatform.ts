@@ -48,7 +48,16 @@ export class ViCareThermostatPlatform {
     private readonly api: HomebridgeAPI
   ) {
     this.clientId = config.clientId;
-    this.apiEndpoint = config.apiEndpoint;
+
+    if (/\/iot\/v1(?:\/|$)/.test(config.apiEndpoint)) {
+      this.log.warn(
+        'Your configured apiEndpoint uses the deprecated /iot/v1 API. Automatically upgrading to /iot/v2. Please update your config.json to use "https://api.viessmann-climatesolutions.com/iot/v2".'
+      );
+      this.apiEndpoint = config.apiEndpoint.replace(/\/iot\/v1(?=\/|$)/, '/iot/v2');
+    } else {
+      this.apiEndpoint = config.apiEndpoint;
+    }
+
     this.devices = config.devices;
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();

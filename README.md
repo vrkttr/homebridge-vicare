@@ -42,7 +42,7 @@ To use this plugin, you will need to create an API key by following these steps:
       platform: 'ViCareThermostatPlatform',
       name: 'ViCareThermostat',
       clientId: 'YOUR CLIENT ID',
-      apiEndpoint: 'https://api.viessmann-climatesolutions.com/iot/v1',
+      apiEndpoint: 'https://api.viessmann-climatesolutions.com/iot/v2',
       hostIp: 'YOUR HOST IP', // optional, default is the detected IP address
       devices: [
         {
