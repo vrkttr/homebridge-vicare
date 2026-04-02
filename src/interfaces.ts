@@ -109,7 +109,7 @@ export interface LocalDevice {
 }
 
 export interface LocalConfig {
-  apiEndpoint: string;
+  apiEndpoint?: string;
   clientId: string;
   devices: Array<HomebridgePlatformConfig & LocalDevice>;
   hostIp?: string;

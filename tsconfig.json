@@ -19,5 +19,5 @@
     "strictFunctionTypes": true,
     "target": "ES6"
   },
-  "exclude": ["dist", "node_modules", "test", "vitest.config.ts"]
+  "exclude": ["dist", "node_modules", "src/__tests__", "test", "vitest.config.ts"]
 }

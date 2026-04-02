@@ -4134,7 +4134,7 @@ validate-npm-package-name@^6.0.2:
   optionalDependencies:
     fsevents "~2.3.3"
 
-vitest@^4.1.2:
+vitest@4.1.2:
   version "4.1.2"
   resolved "https://registry.npmjs.org/vitest/-/vitest-4.1.2.tgz#3f7b36838ddf1067160489bea9a21ef465496265"
   integrity sha512-xjR1dMTVHlFLh98JE3i/f/WePqJsah4A0FK9cc8Ehp9Udk0AZk6ccpIZhh1qJ/yxVWRZ+Q54ocnD8TXmkhspGg==

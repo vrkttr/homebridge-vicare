@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write
 
 jobs:
   build_test_publish:
@@ -21,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f
         with:
-          node-version: 22.x
+          node-version: 24
           cache: yarn
 
       - name: Build, lint and test
@@ -36,6 +37,5 @@ jobs:
           github.event_name != 'pull_request' &&
           !startsWith(github.event.head_commit.message, 'chore(deps')
         env:
-          NPM_TOKEN: ${{secrets.NPM_TOKEN}}
-          GH_TOKEN: ${{secrets.GH_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: yarn release

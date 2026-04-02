@@ -17,7 +17,7 @@
     "prettier": "3.8.1",
     "semantic-release": "25.0.3",
     "typescript": "6.0.2",
-    "vitest": "^4.1.2"
+    "vitest": "4.1.2"
   },
   "engines": {
     "homebridge": ">=0.4.50",
@@ -56,5 +56,5 @@
     "test": "vitest run"
   },
   "type": "module",
-  "version": "2.10.6"
+  "version": "2.10.7"
 }
