@@ -1,3 +1,11 @@
+## [2.10.7](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.6...v2.10.7) (2026-04-02)
+
+
+### Bug Fixes
+
+* publish with OIDC ([59f8aa3](https://github.com/vrkttr/homebridge-vicare/commit/59f8aa3fffe60bcced3b6ba3c7ca47dd8dfb0add))
+* use default API endpoint when apiEndpoint is omitted from config ([#77](https://github.com/vrkttr/homebridge-vicare/issues/77)) ([62a2591](https://github.com/vrkttr/homebridge-vicare/commit/62a2591d9ebe4784c83a699a8167091dc4579229))
+
 ## [2.10.6](https://github.com/vrkttr/homebridge-vicare/compare/v2.10.5...v2.10.6) (2025-07-15)
 
 
