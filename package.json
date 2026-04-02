@@ -16,7 +16,8 @@
     "homebridge": "1.11.4",
     "prettier": "3.8.1",
     "semantic-release": "25.0.3",
-    "typescript": "6.0.2"
+    "typescript": "6.0.2",
+    "vitest": "^4.1.2"
   },
   "engines": {
     "homebridge": ">=0.4.50",
@@ -52,7 +53,7 @@
     "lint": "yarn prettier --list-different",
     "release": "semantic-release",
     "prettier": "prettier '**/*.{ts,json,md,yml}'",
-    "test": "exit 0"
+    "test": "vitest run"
   },
   "type": "module",
   "version": "2.10.6"

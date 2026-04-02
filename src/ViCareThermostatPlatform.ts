@@ -26,6 +26,8 @@ import type {
 } from './interfaces.js';
 import {RequestService} from './RequestService.js';
 
+export const DEFAULT_API_ENDPOINT = 'https://api.viessmann-climatesolutions.com/iot/v1';
+
 export class ViCareThermostatPlatform {
   private readonly accessories: HomebridgePlatformAccessory[];
   private readonly apiEndpoint: string;
@@ -48,7 +50,7 @@ export class ViCareThermostatPlatform {
     private readonly api: HomebridgeAPI
   ) {
     this.clientId = config.clientId;
-    this.apiEndpoint = config.apiEndpoint;
+    this.apiEndpoint = config.apiEndpoint || DEFAULT_API_ENDPOINT;
     this.devices = config.devices;
     this.accessories = [];
     this.codeVerifier = this.generateCodeVerifier();
