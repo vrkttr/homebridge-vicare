@@ -20,13 +20,12 @@ import type {
   ViessmannAuthorization,
   ViessmannAPIResponse,
   ViessmannInstallation,
-  ViessmannGateway,
   ViessmannSmartComponent,
   ViessmannAPIError,
 } from './interfaces.js';
 import {RequestService} from './RequestService.js';
 
-export const DEFAULT_API_ENDPOINT = 'https://api.viessmann-climatesolutions.com/iot/v1';
+export const DEFAULT_API_ENDPOINT = 'https://api.viessmann-climatesolutions.com/iot/v2';
 
 export class ViCareThermostatPlatform {
   private readonly accessories: HomebridgePlatformAccessory[];
@@ -266,10 +265,8 @@ export class ViCareThermostatPlatform {
   }
 
   private async retrieveIds(): Promise<{installationId: number; gatewaySerial: string}> {
-    this.log.debug('Retrieving installation IDs...');
-    const url = `${this.apiEndpoint}/equipment/installations`;
-
-    let installationId: number | undefined;
+    this.log.debug('Retrieving installations and gateways...');
+    const url = `${this.apiEndpoint}/equipment/installations?includeGateways=true`;
 
     try {
       const response = await this.requestService.authorizedRequest(url);
@@ -282,41 +279,29 @@ export class ViCareThermostatPlatform {
 
       this.log('Successfully retrieved installations.');
       this.log.debug(JSON.stringify(body, null, 2));
-      const [installation] = (body as ViessmannAPIResponse<ViessmannInstallation[]>).data;
-      installationId = installation.id;
-    } catch (error) {
-      this.log.error('Error retrieving installations:', error);
-      throw error;
-    }
 
-    this.log.debug('Retrieving gateway IDs...');
+      const installations = (body as ViessmannAPIResponse<ViessmannInstallation[]>).data;
 
-    try {
-      const url = `${this.apiEndpoint}/equipment/installations/${installationId}/gateways`;
-      const response = await this.requestService.authorizedRequest(url, 'get');
-
-      const body = (await response.json()) as ViessmannAPIResponse<ViessmannGateway[]> | ViessmannAPIError;
-
-      if (!response.ok) {
-        return await this.requestService.checkForTokenExpiration(body as ViessmannAPIError, url);
+      if (!installations || installations.length === 0) {
+        this.log.error('No installation data available.');
+        throw new Error('No installation data available.');
       }
 
-      this.log('Successfully retrieved gateways.');
-      this.log.debug(JSON.stringify(body, null, 2));
+      const [installation] = installations;
+      const installationId = installation.id;
 
-      if (
-        !(body as ViessmannAPIResponse<ViessmannGateway[]>).data ||
-        (body as ViessmannAPIResponse<ViessmannGateway[]>).data.length === 0
-      ) {
+      if (!installation.gateways || installation.gateways.length === 0) {
         this.log.error('No gateway data available.');
         throw new Error('No gateway data available.');
       }
 
-      const [gateway] = (body as ViessmannAPIResponse<ViessmannGateway[]>).data;
+      const [gateway] = installation.gateways;
       const gatewaySerial = gateway.serial;
+
+      this.log('Successfully retrieved installation and gateway IDs.');
       return {installationId, gatewaySerial};
     } catch (error) {
-      this.log.error('Error retrieving gateways:', error);
+      this.log.error('Error retrieving installation and gateway IDs:', error);
       throw error;
     }
   }

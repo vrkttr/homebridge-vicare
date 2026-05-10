@@ -1,6 +1,11 @@
 import type {PlatformConfig as HomebridgePlatformConfig} from 'homebridge';
 
+export interface ViessmannAPIResponseCursor {
+  next?: string;
+}
+
 export interface ViessmannAPIResponse<T> {
+  cursor?: ViessmannAPIResponseCursor;
   data: T;
 }
 
@@ -24,6 +29,7 @@ export interface ViessmannInstallation {
   aggregatedStatus: string;
   description: string;
   endUserWlanCommissioned: boolean;
+  gateways?: ViessmannGateway[];
   id: number;
   installationType: string;
   ownedByMaintainer: boolean;

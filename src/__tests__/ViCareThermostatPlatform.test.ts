@@ -70,7 +70,7 @@ function createMockApi() {
 describe('ViCareThermostatPlatform', () => {
   describe('DEFAULT_API_ENDPOINT', () => {
     it('should have the correct Viessmann API endpoint', () => {
-      expect(DEFAULT_API_ENDPOINT).toBe('https://api.viessmann-climatesolutions.com/iot/v1');
+      expect(DEFAULT_API_ENDPOINT).toBe('https://api.viessmann-climatesolutions.com/iot/v2');
     });
 
     it('should be a valid URL', () => {
