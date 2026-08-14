@@ -1,3 +1,7 @@
+# NOTE
+
+## As of 2026-08-14, this project is unmaintained since the maintainers are not using this plugin anymore. Feel free to fork and improve this plugin.
+
 # Homebridge ViCare Plugin
 
 The Homebridge ViCare Plugin allows you to integrate your Viessmann ViCare heating system with [Homebridge](https://homebridge.io), enabling control and monitoring through Apple's HomeKit. This plugin provides real-time temperature readings, control over target temperatures, and access to various sensors and states of your heating system.
